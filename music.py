@@ -23,23 +23,23 @@ import google.generativeai as genai
 import pretty_midi
 
 # --- Configuration ---
-API_KEY = os.environ.get("API_KEY", "AIzaSyC5jbwgP050qfurqK9GyvgrUYvpwEy0n8s") # Placeholder - Replace or use env var
+GEMINI_KEY = os.environ.get("GEMINI_KEY", "") # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
 GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
 
 # Configuration dictionary
 CONFIG = {
-    "api_key": API_KEY,
+    "api_key": GEMINI_KEY,
     "gemini_model": GEMINI_MODEL,
-    "initial_description": "trans electronic hiphop cosmic ambient music fast 160 bpm optimistic",
+    "initial_description": "trans hiphop cosmic ambient music fast 160 bpm",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
     "default_key": "Amin",
     "generation_retries": 3,
     "generation_delay": 5,
-    "max_total_bars": 64,  # Limit total length for safety/cost
+    "max_total_bars": 128,  # Limit total length for safety/cost
     "min_section_bars": 16,
     "max_section_bars": 32,
     "temperature": 0.7,
@@ -86,8 +86,8 @@ def configure_genai():
     """Configures the Google Generative AI library."""
     if not CONFIG["api_key"]:
         print(
-            "ERROR: API_KEY environment variable is not set or config is None."
-            " Please set the API_KEY environment variable."
+            "ERROR: GEMINI_KEY environment variable is not set or config is None."
+            " Please set the GEMINI_KEY environment variable."
         )
         exit(1)
     try:
@@ -97,7 +97,7 @@ def configure_genai():
         )
     except Exception as e:
         print(f"Error configuring Generative AI: {e}")
-        print("Please ensure your API_KEY is set correctly and valid.")
+        print("Please ensure your GEMINI_KEY is set correctly and valid.")
         exit(1)
 
 
