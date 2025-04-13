@@ -6,7 +6,7 @@ import time # For potential rate limiting
 
 # --- Configuration ---
 API_KEY = "AIzaSyC5jbwgP050qfurqK9GyvgrUYvpwEy0n8s" # IMPORTANT: Use environment variables or secrets management in real apps!
-GEMINI_MODEL = 'gemini-2.0-pro-exp-02-05'  #'gemini-2.0-flash-001'
+GEMINI_MODEL = 'gemini-2.5-pro-exp-03-25'  #'gemini-2.0-pro-exp-02-05'
 INITIAL_DESCRIPTION = "A simple, slightly melancholic loopable piano piece suitable for a game background."
 SECTIONS = {
     "A1": {"bars": 8, "goal": "Establish the main melancholic theme in C minor. Simple texture."},
