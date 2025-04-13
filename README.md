@@ -118,3 +118,9 @@ A concise format is crucial for efficient LLM generation and parsing. The recomm
 -   **User Interface:** Develop a simple GUI or web interface for easier interaction.
 -   **Error Handling:** Implement more comprehensive error checking and reporting in the parser.
 -   **Music Theory Constraints:** Explore adding rules or constraints to the LLM prompts or post-processing steps to enforce basic music theory principles.
+
+
+# TODO
+
+- generate sections by LLM as well
+- save to file with time in filename (so it will be new every time)

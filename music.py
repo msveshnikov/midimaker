@@ -14,7 +14,7 @@ SECTIONS = {
     "A2": {"bars": 8, "goal": "Return to the main theme, similar to A1 but maybe with slight embellishment."},
 }
 OUTPUT_FILENAME = "generated_music.mid"
-DEFAULT_TEMPO = 90
+DEFAULT_TEMPO = 120
 DEFAULT_TIMESIG = (4, 4)
 DEFAULT_KEY = "Cmin"
 
