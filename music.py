@@ -26,11 +26,11 @@ import pretty_midi
 API_KEY = os.environ.get("API_KEY", "AIzaSyC5jbwgP050qfurqK9GyvgrUYvpwEy0n8s") # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
-GEMINI_MODEL = "gemini-2.0-flash-thinking-exp-01-21" # Or other suitable models like 'gemini-1.0-pro'
+GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
 
 # Initial high-level description of the music
 INITIAL_DESCRIPTION = (
-    "Optimistic electro hiphop"
+    "trans electronic hiphop cosmic ambient music fast 160 bpm optimistic"
 )
 
 # Define the structure and goals for each section
@@ -38,15 +38,19 @@ INITIAL_DESCRIPTION = (
 SECTIONS = {
     "A1": {
         "bars": 8,
-        "goal": "Establish the main melancholic theme in C minor. Simple texture, sparse piano.",
+        "goal": "Establish the main theme",
     },
     "B": {
-        "bars": 8,
-        "goal": "Introduce a slight variation or counter-melody, perhaps brightening slightly towards Eb major. Slightly more active rhythm.",
+        "bars": 16,
+        "goal": "Introduce a slight variation or counter-melody, Slightly more active rhythm.",
     },
     "A2": {
         "bars": 8,
         "goal": "Return to the main theme, similar to A1 but maybe with slight embellishment or a fuller chord in the left hand. End conclusively for looping.",
+    },
+    "C": {
+        "bars": 8,
+        "goal": "Final and conclusive section, possibly a coda or outro. Use a different instrument or sound to signal the end.",
     },
 }
 
