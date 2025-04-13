@@ -1,13 +1,13 @@
 ```markdown
-## Email Marketing Campaign for AutoMusic Generator
+## Email Marketing Campaign for MidiMaker Generator
 
-Here's a series of 3 emails designed to promote the AutoMusic Generator project, suitable for a markdown file.
+Here's a series of 3 emails designed to promote the MidiMaker Generator project, suitable for a markdown file.
 
 ---
 
 ### Email 1: Introduction - "Unleash Your Inner Composer with AI"
 
-**Subject:** 🎶  Imagine Creating Music Just by Describing It... Introducing AutoMusic Generator!
+**Subject:** 🎶  Imagine Creating Music Just by Describing It... Introducing MidiMaker Generator!
 
 **Body:**
 
@@ -15,13 +15,13 @@ Hi Music Enthusiast,
 
 Ever dreamt of composing your own music but felt limited by traditional instruments or music theory? What if you could simply describe the music you hear in your head and have it come to life?
 
-Introducing **AutoMusic Generator**, a groundbreaking project that explores the exciting intersection of Large Language Models (LLMs) and music creation!
+Introducing **MidiMaker Generator**, a groundbreaking project that explores the exciting intersection of Large Language Models (LLMs) and music creation!
 
 This project allows you to generate MIDI music from textual descriptions. Imagine typing "a melancholic piano piece in a minor key" and getting a musical piece in return!
 
 **Here's the core idea:**
 
-AutoMusic Generator uses a smart pipeline to translate your musical ideas into actual music:
+MidiMaker Generator uses a smart pipeline to translate your musical ideas into actual music:
 
 *   **Describe your music:** Start with a simple text description.
 *   **AI Enrichment:**  Large Language Models (LLMs) expand on your idea, creating a detailed musical plan.
@@ -36,32 +36,32 @@ AutoMusic Generator uses a smart pipeline to translate your musical ideas into a
 
 Ready to learn more and see how you can turn text into music?
 
-[**Learn More About AutoMusic Generator Here**]([LINK TO LANDING PAGE/GITHUB REPO HERE])
+[**Learn More About MidiMaker Generator Here**]([LINK TO LANDING PAGE/GITHUB REPO HERE])
 
 Stay tuned for our next email where we'll dive deeper into a key feature: **Sectional Generation for Coherent Long Pieces!**
 
 Happy music making (or describing!),
 
-The AutoMusic Generator Team
+The MidiMaker Generator Team
 
 
 ---
 
 ### Email 2: Feature Highlight - "Say Goodbye to Repetitive AI Music"
 
-**Subject:** ✨  The Secret to Coherent AI Music Generation: Sectional Generation in AutoMusic Generator
+**Subject:** ✨  The Secret to Coherent AI Music Generation: Sectional Generation in MidiMaker Generator
 
 **Body:**
 
 Hi Again,
 
-In our previous email, we introduced you to AutoMusic Generator and the exciting possibility of creating music from text.
+In our previous email, we introduced you to MidiMaker Generator and the exciting possibility of creating music from text.
 
-Today, we want to highlight a key innovation that sets AutoMusic Generator apart: **Sectional Generation**.
+Today, we want to highlight a key innovation that sets MidiMaker Generator apart: **Sectional Generation**.
 
 One of the biggest challenges in AI music generation, especially for longer pieces, is maintaining coherence and structure.  Have you ever noticed AI-generated music sounding repetitive or lacking direction?
 
-**AutoMusic Generator tackles this head-on with its Sectional Generation Strategy.**
+**MidiMaker Generator tackles this head-on with its Sectional Generation Strategy.**
 
 Instead of trying to generate a 5-minute piece all at once, we break down the process into smaller, manageable sections (like musical sections A, B, C...).
 
@@ -78,26 +78,26 @@ Instead of trying to generate a 5-minute piece all at once, we break down the pr
 
 [**Explore the Sectional Generation Strategy in Detail**]([LINK TO DOCS/README SECTION ON SECTIONAL GENERATION HERE])
 
-In our next (and final) email, we'll show you how you can get involved and start experimenting with AutoMusic Generator yourself!
+In our next (and final) email, we'll show you how you can get involved and start experimenting with MidiMaker Generator yourself!
 
 Stay tuned,
 
-The AutoMusic Generator Team
+The MidiMaker Generator Team
 
 
 ---
 
 ### Email 3: Call to Action - "Start Creating Your AI Music Today!"
 
-**Subject:** 🚀  Ready to Generate Your Own Music from Text? Dive into AutoMusic Generator Now!
+**Subject:** 🚀  Ready to Generate Your Own Music from Text? Dive into MidiMaker Generator Now!
 
 **Body:**
 
 Hello Future Composer,
 
-Over the last two emails, we've introduced you to AutoMusic Generator and highlighted its innovative Sectional Generation approach for creating coherent and structured music from text descriptions.
+Over the last two emails, we've introduced you to MidiMaker Generator and highlighted its innovative Sectional Generation approach for creating coherent and structured music from text descriptions.
 
-Now, it's time to take the next step and explore AutoMusic Generator for yourself!
+Now, it's time to take the next step and explore MidiMaker Generator for yourself!
 
 **Here's your invitation to dive in:**
 
@@ -107,7 +107,7 @@ Now, it's time to take the next step and explore AutoMusic Generator for yoursel
 *   **Check out the README:**  Dive deep into the technical details, understand the Compact Symbolic Format, and learn how to use the `music.py` script.
     [**[LINK TO README FILE DIRECTLY IF POSSIBLE]**]([LINK TO README FILE DIRECTLY IF POSSIBLE])
 
-*   **Contribute and Experiment:**  AutoMusic Generator is an open-source project.  We encourage you to explore the code, experiment with different prompts, and even contribute to its development!
+*   **Contribute and Experiment:**  MidiMaker Generator is an open-source project.  We encourage you to explore the code, experiment with different prompts, and even contribute to its development!
 
 **What can you do right now?**
 
@@ -115,13 +115,13 @@ Now, it's time to take the next step and explore AutoMusic Generator for yoursel
 2.  **Read the README to understand the project's architecture and how to use it.**
 3.  **If you're technically inclined, consider cloning the repository and experimenting!**
 
-The future of music creation is here, and it's more accessible than ever.  Start exploring the possibilities with AutoMusic Generator today and unleash your inner composer!
+The future of music creation is here, and it's more accessible than ever.  Start exploring the possibilities with MidiMaker Generator today and unleash your inner composer!
 
 Let us know what amazing music you create!
 
 Happy generating,
 
-The AutoMusic Generator Team
+The MidiMaker Generator Team
 
 
 ---

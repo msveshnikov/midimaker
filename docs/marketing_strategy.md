@@ -1,9 +1,9 @@
 ```markdown
-# Marketing Strategy: AutoMusic Generator
+# Marketing Strategy: MidiMaker Generator
 
 ## Executive Summary
 
-AutoMusic Generator is an innovative project leveraging Large Language Models (LLMs) to generate MIDI music from textual descriptions. Its key differentiators are its sectional generation approach for coherence and a compact symbolic format for efficiency. This marketing strategy aims to position AutoMusic Generator as a valuable tool for musicians, AI enthusiasts, developers, and content creators, focusing on its ease of use, creative potential, and technical novelty. The strategy will utilize a multi-channel approach emphasizing digital content, community engagement, and open-source principles to build awareness, drive adoption, and foster a thriving user base.
+MidiMaker Generator is an innovative project leveraging Large Language Models (LLMs) to generate MIDI music from textual descriptions. Its key differentiators are its sectional generation approach for coherence and a compact symbolic format for efficiency. This marketing strategy aims to position MidiMaker Generator as a valuable tool for musicians, AI enthusiasts, developers, and content creators, focusing on its ease of use, creative potential, and technical novelty. The strategy will utilize a multi-channel approach emphasizing digital content, community engagement, and open-source principles to build awareness, drive adoption, and foster a thriving user base.
 
 ## 1. Target Audience
 
@@ -27,7 +27,7 @@ We will target several key audience segments, each with slightly tailored messag
 
 ## 2. Key Messaging
 
-Our messaging will revolve around the core benefits and unique selling propositions of AutoMusic Generator, tailored for each target audience:
+Our messaging will revolve around the core benefits and unique selling propositions of MidiMaker Generator, tailored for each target audience:
 
 **Overall Messaging Pillars:**
 
@@ -40,10 +40,10 @@ Our messaging will revolve around the core benefits and unique selling propositi
 **Audience-Specific Messaging:**
 
 *   **For Musicians:** "Unlock your musical ideas with AI. Generate unique MIDI music from text descriptions, from simple melodies to complex arrangements, in minutes." (Focus on creativity, ease of use, speed)
-*   **For AI Enthusiasts:** "Explore the future of AI music generation. AutoMusic Generator demonstrates advanced LLM techniques for creating structured and coherent musical pieces. Dive into the code and contribute!" (Focus on technology, innovation, open-source aspect)
-*   **For Developers:** "A robust and modular text-to-MIDI pipeline. AutoMusic Generator is open-source and extensible, offering a solid foundation for building your own music AI applications. Contribute to the project!" (Focus on technical details, modularity, open-source contribution)
+*   **For AI Enthusiasts:** "Explore the future of AI music generation. MidiMaker Generator demonstrates advanced LLM techniques for creating structured and coherent musical pieces. Dive into the code and contribute!" (Focus on technology, innovation, open-source aspect)
+*   **For Developers:** "A robust and modular text-to-MIDI pipeline. MidiMaker Generator is open-source and extensible, offering a solid foundation for building your own music AI applications. Contribute to the project!" (Focus on technical details, modularity, open-source contribution)
 *   **For Content Creators:** "Royalty-free, custom music for your projects made easy. Generate unique background music for videos, games, and podcasts with simple text prompts, saving time and money." (Focus on cost-effectiveness, customization, practicality)
-*   **For Educators/Students:** "Learn AI and music composition in a practical way. AutoMusic Generator offers a hands-on approach to exploring the intersection of music and technology. A valuable tool for education and research." (Focus on educational value, learning opportunities, research potential)
+*   **For Educators/Students:** "Learn AI and music composition in a practical way. MidiMaker Generator offers a hands-on approach to exploring the intersection of music and technology. A valuable tool for education and research." (Focus on educational value, learning opportunities, research potential)
 
 ## 3. Marketing Channels
 
@@ -66,7 +66,7 @@ We will utilize a mix of online channels to reach our target audiences:
     *   **Online Music Forums & Communities:** (e.g., music-related subreddits, online composer forums, music production forums). Engage in discussions, share project announcements, answer questions, and gather feedback.
     *   **AI & ML Communities & Forums:** (e.g., AI/ML subreddits, online AI forums). Share the project within relevant tech communities to reach AI enthusiasts and developers.
     *   **Developer Communities (Stack Overflow, Dev.to):**  Share technical details, answer questions related to the code, and invite contributions within developer communities.
-    *   **Content Creator Platforms (YouTube, Vimeo, Twitch):** Reach out to content creators and demonstrate how AutoMusic Generator can be used to create music for their projects.
+    *   **Content Creator Platforms (YouTube, Vimeo, Twitch):** Reach out to content creators and demonstrate how MidiMaker Generator can be used to create music for their projects.
     *   **Educational Platforms & Forums:**  Share information with educators and students through relevant channels.
 
 ## 4. Marketing Campaign Ideas
@@ -89,7 +89,7 @@ Here are some specific campaign ideas to kickstart marketing efforts:
 *   **"Compose with AI Challenge" (Community Engagement):**
     *   **Goal:**  Drive user adoption, generate user-created content, and build community.
     *   **Activities:**
-        *   Launch a contest where users generate music using AutoMusic Generator based on specific themes or prompts.
+        *   Launch a contest where users generate music using MidiMaker Generator based on specific themes or prompts.
         *   Users submit their generated MIDI files (or audio renditions).
         *   Feature winning entries on the project website and social media.
         *   Offer small prizes (recognition, digital badges, etc.).
@@ -101,10 +101,10 @@ Here are some specific campaign ideas to kickstart marketing efforts:
         *   The workings of the `music.py` script and MIDI conversion process.
         *   Future development plans and technical challenges.
 *   **"Music for Your Project" Content Campaign (Content Creators):**
-    *   **Goal:**  Target content creators and demonstrate the practical application of AutoMusic Generator for their needs.
+    *   **Goal:**  Target content creators and demonstrate the practical application of MidiMaker Generator for their needs.
     *   **Activities:**
         *   Create demo videos showcasing how to generate music for different types of content (video game soundtracks, podcast intros, YouTube background music).
-        *   Offer free MIDI tracks generated by AutoMusic Generator for content creators to use in their projects (with attribution).
+        *   Offer free MIDI tracks generated by MidiMaker Generator for content creators to use in their projects (with attribution).
         *   Reach out to content creator communities and forums to promote the tool.
 
 ## 5. Metrics & KPIs
@@ -124,7 +124,7 @@ We will track the following metrics to measure the success of our marketing effo
     *   Website clicks from social media.
 *   **Community Engagement:**
     *   Participation in online forums and communities.
-    *   User-generated content (e.g., music created with AutoMusic Generator).
+    *   User-generated content (e.g., music created with MidiMaker Generator).
     *   Feedback and suggestions received.
 *   **Media Mentions:** Track mentions in blogs, news articles, podcasts, and other media outlets.
 *   **Downloads/Usage:** (If trackable - e.g., if a downloadable application or API is developed later).
@@ -161,5 +161,5 @@ Initially, marketing efforts will primarily be organic and low-budget, leveragin
 
 ## 8. Conclusion
 
-This marketing strategy provides a framework for promoting AutoMusic Generator and building a thriving community around it. By focusing on clear messaging, targeted channels, and engaging campaigns, we can effectively reach our diverse audiences and establish AutoMusic Generator as a valuable and innovative tool in the AI music generation landscape.  Continuous monitoring of metrics and adaptation based on user feedback will be crucial for long-term success.
+This marketing strategy provides a framework for promoting MidiMaker Generator and building a thriving community around it. By focusing on clear messaging, targeted channels, and engaging campaigns, we can effectively reach our diverse audiences and establish MidiMaker Generator as a valuable and innovative tool in the AI music generation landscape.  Continuous monitoring of metrics and adaptation based on user feedback will be crucial for long-term success.
 ```

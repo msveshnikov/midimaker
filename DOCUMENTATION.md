@@ -2,7 +2,7 @@
 
 ## 1. Project Overview
 
-**AutoMusic Generator** is a project focused on generating MIDI music compositions from textual descriptions leveraging the power of Large Language Models (LLMs). It addresses the challenge of maintaining musical coherence and structure in longer generated pieces by employing a sectional generation strategy.
+**MidiMaker Generator** is a project focused on generating MIDI music compositions from textual descriptions leveraging the power of Large Language Models (LLMs). It addresses the challenge of maintaining musical coherence and structure in longer generated pieces by employing a sectional generation strategy.
 
 The core concept involves:
 
@@ -119,7 +119,7 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 
     ```bash
     git clone <repository-url>
-    cd automusic-generator # Or your repository directory name
+    cd MidiMaker-generator # Or your repository directory name
     ```
 
 2.  **Set up a Python Environment (Recommended):**

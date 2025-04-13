@@ -1,8 +1,8 @@
-## AutoMusic Generator - Initial Release
+## MidiMaker Generator - Initial Release
 
 **Version 1.0**
 
-Welcome to the first release of AutoMusic Generator! This app allows you to create MIDI music from text descriptions using the power of AI.
+Welcome to the first release of MidiMaker Generator! This app allows you to create MIDI music from text descriptions using the power of AI.
 
 **Key Features:**
 
@@ -25,4 +25,4 @@ Welcome to the first release of AutoMusic Generator! This app allows you to crea
 * User configuration options for tempo, key, and instrumentation.
 * Enhanced music theory integration.
 
-Thank you for trying AutoMusic Generator! We appreciate your feedback and look forward to improving the app based on your experience.
+Thank you for trying MidiMaker Generator! We appreciate your feedback and look forward to improving the app based on your experience.

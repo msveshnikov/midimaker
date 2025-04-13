@@ -1,6 +1,6 @@
-Unleash your inner composer with AutoMusic Generator!  Imagine turning your textual ideas into beautiful MIDI music.  This innovative app uses the power of Large Language Models (LLMs) to transform simple text descriptions into structured musical compositions, section by section, ensuring coherence and musicality even in longer pieces.
+Unleash your inner composer with MidiMaker Generator!  Imagine turning your textual ideas into beautiful MIDI music.  This innovative app uses the power of Large Language Models (LLMs) to transform simple text descriptions into structured musical compositions, section by section, ensuring coherence and musicality even in longer pieces.
 
-Are you a songwriter looking for a melody to match your lyrics? A game developer needing background music? Or simply curious about the intersection of AI and music? AutoMusic Generator is your perfect tool.
+Are you a songwriter looking for a melody to match your lyrics? A game developer needing background music? Or simply curious about the intersection of AI and music? MidiMaker Generator is your perfect tool.
 
 **Key Features:**
 
@@ -9,7 +9,7 @@ Are you a songwriter looking for a melody to match your lyrics? A game developer
 * **Compact Symbolic Format:**  Leverages a smart, text-based format that's both efficient for AI and easy to parse, ensuring accurate MIDI conversion.
 * **Customizable Instruments and Styles:** Guide the AI with your descriptions – specify instruments (piano, guitar, etc.), tempo, key, and time signature to shape your musical creation.
 * **Algorithmic Precision:**  Powered by a Python script (`music.py`) that meticulously converts the symbolic representation into a standard MIDI file, ready for use in your favorite music software.
-* **Inspire Your Creativity:**  Overcome writer's block or simply explore new musical ideas. AutoMusic Generator is a fantastic starting point for your musical journey.
+* **Inspire Your Creativity:**  Overcome writer's block or simply explore new musical ideas. MidiMaker Generator is a fantastic starting point for your musical journey.
 * **Future-Forward Technology:**  Experience the cutting edge of AI music generation, with planned enhancements like support for dynamics, articulations, and more nuanced musical expressions.
 
 **How it Works:**
@@ -20,4 +20,4 @@ Are you a songwriter looking for a melody to match your lyrics? A game developer
 4. **Symbolic Representation:** Each section is represented in a compact, text-based format that captures notes, chords, rhythm, and instrumentation.
 5. **MIDI Conversion:** The `music.py` script transforms the symbolic text into a MIDI file (.mid) that you can use with any MIDI-compatible software.
 
-AutoMusic Generator is more than just a music generator; it's a creative partner, helping you translate your musical ideas from concept to composition. Download now and start creating your AI-powered musical masterpieces!
+MidiMaker Generator is more than just a music generator; it's a creative partner, helping you translate your musical ideas from concept to composition. Download now and start creating your AI-powered musical masterpieces!

@@ -1,1 +1,1 @@
-AutoMusic Generator
+MidiMaker Generator

@@ -1,4 +1,4 @@
-Okay, team. Based on the project description for the AutoMusic Generator and our current state (basic project structure with `music.py` and `landing.html` placeholders), let's define our focus for the upcoming sprint.
+Okay, team. Based on the project description for the MidiMaker Generator and our current state (basic project structure with `music.py` and `landing.html` placeholders), let's define our focus for the upcoming sprint.
 
 Our main goal is to establish the core conversion capability – transforming the defined symbolic representation into a usable MIDI file. This validates a critical part of the pipeline before we invest heavily in the LLM generation aspects.
 

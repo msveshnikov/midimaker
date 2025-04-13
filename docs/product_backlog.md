@@ -1,6 +1,6 @@
 Okay, here is the updated Product Backlog based on the provided `README.md`, current project state, and today's date (Sun Apr 13 2025).
 
-**Product Owner Agent:** Backlog Update - AutoMusic Generator
+**Product Owner Agent:** Backlog Update - MidiMaker Generator
 **Date:** 2025-04-13
 
 **Project Goal:** To create a system that generates coherent MIDI music from textual descriptions using LLMs via a sectional generation approach and a compact symbolic format parsed by a Python script.
@@ -9,7 +9,7 @@ Okay, here is the updated Product Backlog based on the provided `README.md`, cur
 
 ---
 
-## Product Backlog - AutoMusic Generator
+## Product Backlog - MidiMaker Generator
 
 *(Items are ordered by priority within each section)*
 
