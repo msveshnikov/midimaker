@@ -4,7 +4,6 @@ This project explores the generation of MIDI music from textual descriptions usi
 
 ![alt text](image.jpg)
 
-
 ## Core Concept
 
 The primary challenge in generating long musical pieces (e.g., 5 minutes) with LLMs is maintaining coherence and structure. This project addresses this by:
@@ -72,17 +71,12 @@ A concise format is crucial for efficient LLM generation and parsing. The recomm
 -   **Symbolic Format Robustness:** The format needs to balance expressiveness (capturing necessary musical detail) with simplicity (for LLM generation and parsing). It might need extensions for more complex features (e.g., dynamics changes, articulations).
 -   **Parsing Reliability:** The `music.py` script needs robust parsing logic to handle potential variations or minor errors in the LLM's symbolic output.
 -   **Musical Cohesion:** Ensuring smooth transitions and consistent musical language across sections generated in separate steps remains a key challenge.
--   **Evaluation:** Assessing the musical quality of the generated output is subjective and requires careful listening or potentially computational analysis.
 
 ## Future Enhancements
 
--   **Automated LLM Interaction:** Integrate LLM API calls directly into the Python script to streamline the generation process.
 -   **Enhanced Symbolic Format:** Add support for more musical nuances like gradual tempo/dynamic changes, articulations, pedal markings, etc.
 -   **Improved State Management:** Implement more sophisticated ways to pass context between sectional generation prompts.
 -   **Configuration File:** Manage settings like default tempo, key, time signature, and symbolic format definitions via a config file.
--   **User Interface:** Develop a simple GUI or web interface for easier interaction.
--   **Error Handling:** Implement more comprehensive error checking and reporting in the parser.
 -   **Music Theory Constraints:** Explore adding rules or constraints to the LLM prompts or post-processing steps to enforce basic music theory principles.
-
 
 # TODO

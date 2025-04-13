@@ -1,0 +1,28 @@
+## AutoMusic Generator - Initial Release
+
+**Version 1.0**
+
+Welcome to the first release of AutoMusic Generator! This app allows you to create MIDI music from text descriptions using the power of AI.
+
+**Key Features:**
+
+* **Text-to-MIDI Generation:**  Convert your textual musical ideas into MIDI files.
+* **Sectional Music Generation:**  Generates structured music by creating compositions section by section for better coherence.
+* **Compact Symbolic Format:**  Utilizes a concise text-based format for efficient music representation and processing.
+* **MIDI File Output:**  Exports generated music as standard MIDI files (.mid) compatible with most music software.
+* **Powered by Large Language Models (LLMs):** Leverages AI to interpret your text prompts and create musical compositions.
+
+**Known Issues:**
+
+* Initial release, further testing and improvements are ongoing.
+* Music generation quality is dependent on the clarity and detail of the text prompt.
+* May require experimentation with prompts to achieve desired musical results.
+
+**Future Enhancements (Planned):**
+
+* Support for more advanced musical features (dynamics, articulations, etc.).
+* Improved prompt engineering guidance and examples.
+* User configuration options for tempo, key, and instrumentation.
+* Enhanced music theory integration.
+
+Thank you for trying AutoMusic Generator! We appreciate your feedback and look forward to improving the app based on your experience.
