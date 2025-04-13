@@ -63,44 +63,6 @@ A concise format is crucial for efficient LLM generation and parsing. The recomm
 -   **Benefits:** Improves feasibility for longer pieces, allows finer control over musical development, encourages clear structural form.
 -   **Challenges:** Requires careful prompt engineering to ensure smooth transitions and overall coherence between independently generated sections. Passing summaries or key features of the previous section in the prompt for the next section can help.
 
-## `music.py` Script
-
--   **Role:** Parses the concatenated text file containing the music in the compact symbolic format and generates a standard MIDI file.
--   **Dependencies:** Python 3, `mido` (or potentially `pretty_midi`). A `requirements.txt` file should list dependencies.
--   **Input:** Path to the input text file (e.g., `symbolic_music.txt`).
--   **Output:** Path for the generated output MIDI file (e.g., `generated_music.mid`).
-
-## Setup
-
-1.  Clone the repository:
-    ```bash
-    git clone <repository-url>
-    cd <repository-directory>
-    ```
-2.  Create and activate a virtual environment (recommended):
-    ```bash
-    python -m venv venv
-    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-    ```
-3.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt # Assuming requirements.txt exists
-    ```
-    _(If `requirements.txt` doesn't exist yet, you'll need to `pip install mido` or other required libraries)._
-
-## Usage
-
-1.  **Generate Symbolic Representation:** Use an LLM (e.g., ChatGPT, Claude) with carefully crafted prompts (following the sectional strategy) to generate the music in the defined compact symbolic format. Save the concatenated output to a text file (e.g., `my_piece_symbolic.txt`).
-2.  **Run the Conversion Script:**
-    ```bash
-    python music.py <input_symbolic_file.txt> <output_midi_file.mid>
-    ```
-    _Example:_
-    ```bash
-    python music.py my_piece_symbolic.txt generated_piece.mid
-    ```
-3.  **Listen:** Open `generated_piece.mid` in a MIDI player or Digital Audio Workstation (DAW).
-
 ## Design Considerations & Challenges
 
 -   **LLM Prompt Engineering:** Crafting effective prompts is critical for generating musically coherent and structurally sound sections that adhere to the symbolic format.
@@ -122,5 +84,4 @@ A concise format is crucial for efficient LLM generation and parsing. The recomm
 
 # TODO
 
-- generate sections by LLM as well
-- save to file with time in filename (so it will be new every time)
+- generate sections by LLM as well, not hardcoded ones
