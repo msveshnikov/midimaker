@@ -2,6 +2,9 @@
 
 This project explores the generation of MIDI music from textual descriptions using Large Language Models (LLMs). It employs a pipeline that translates high-level musical ideas into a compact symbolic representation, generates music section by section for better coherence, and finally converts this representation into a standard MIDI file using a Python script.
 
+![alt text](image.jpg)
+
+
 ## Core Concept
 
 The primary challenge in generating long musical pieces (e.g., 5 minutes) with LLMs is maintaining coherence and structure. This project addresses this by:
@@ -83,6 +86,3 @@ A concise format is crucial for efficient LLM generation and parsing. The recomm
 
 
 # TODO
-
-- generate section descriptions by LLM as well, do not use hardcoded ones
-- add more instruments

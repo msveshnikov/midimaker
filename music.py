@@ -21,8 +21,6 @@ import google.generativeai as genai
 import pretty_midi
 
 # --- Configuration ---
-# IMPORTANT: Use environment variables or secrets management for API keys in real applications!
-# Set the API_KEY environment variable or replace the placeholder below.
 API_KEY = os.environ.get("API_KEY", "AIzaSyC5jbwgP050qfurqK9GyvgrUYvpwEy0n8s") # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
