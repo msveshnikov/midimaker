@@ -136,12 +136,12 @@ This format is designed for conciseness and ease of parsing, making it suitable 
     ```
 
 4.  **Configure API Key:**
-    -   The script attempts to read the Google AI API key from the environment variable `API_KEY`. Set this variable in your system:
+    -   The script attempts to read the Google AI API key from the environment variable `GEMINI_KEY`. Set this variable in your system:
         ```bash
-        export API_KEY='YourActualApiKey' # Linux/macOS
+        export GEMINI_KEY='YourActualApiKey' # Linux/macOS
         # or set it via system properties on Windows
         ```
-    -   Alternatively, you can hardcode the API key directly in `music.py` by replacing the placeholder in the `API_KEY` variable assignment ( **Not Recommended for security reasons**).
+    -   Alternatively, you can hardcode the API key directly in `music.py` by replacing the placeholder in the `GEMINI_KEY` variable assignment ( **Not Recommended for security reasons**).
 
 ## 6. Usage
 
@@ -149,7 +149,7 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 
     -   Open the `music.py` script in a text editor.
     -   Modify the configuration variables near the top as needed:
-        -   `API_KEY`: Ensure this is set correctly (preferably via environment variable).
+        -   `GEMINI_KEY`: Ensure this is set correctly (preferably via environment variable).
         -   `GEMINI_MODEL`: Choose the desired Gemini model (ensure it's compatible with your API key access).
         -   `INITIAL_DESCRIPTION`: Set the high-level text prompt for your desired music.
         -   `SECTIONS`: Define the structure of your piece. Each key is a section name, and the value is a dictionary containing:
@@ -175,7 +175,7 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 
 ## 7. Configuration Details (`music.py`)
 
--   `API_KEY`: Your Google AI API Key. **Required**.
+-   `GEMINI_KEY`: Your Google AI API Key. **Required**.
 -   `GEMINI_MODEL`: The specific Gemini model to use for generation (e.g., `"gemini-1.5-pro-latest"`).
 -   `INITIAL_DESCRIPTION`: A string containing the initial high-level idea for the music.
 -   `SECTIONS`: A dictionary defining the musical structure. Keys are section names (e.g., `"A1"`, `"B"`), values are dictionaries with `"bars"` (integer) and `"goal"` (string).
@@ -201,7 +201,7 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 
 -   **Enhanced Symbolic Format:** Add commands for gradual tempo/dynamic changes (`TempoCurve`, `DynCurve`), articulations (`Art:Staccato`), pedal markings (`Pedal:On/Off`), etc.
 -   **Improved State Management:** Implement more sophisticated methods for passing detailed musical context (e.g., last few notes/chords, harmonic context) between sectional generation prompts instead of just textual summaries.
--   **Configuration File:** Move settings (`API_KEY`, `GEMINI_MODEL`, `SECTIONS`, defaults, format definitions) from the script into a dedicated configuration file (e.g., `config.yaml`, `config.json`).
+-   **Configuration File:** Move settings (`GEMINI_KEY`, `GEMINI_MODEL`, `SECTIONS`, defaults, format definitions) from the script into a dedicated configuration file (e.g., `config.yaml`, `config.json`).
 -   **User Interface:** Develop a simple GUI or Web UI for easier input of descriptions, section definitions, and triggering the generation process.
 -   **Advanced Error Handling:** Implement more comprehensive error checking in the parser and potentially add mechanisms to allow the LLM to correct its mistakes based on parser feedback.
 -   **Music Theory Constraints:** Explore incorporating basic music theory rules (e.g., voice leading, harmonic progressions) either via constraints in the LLM prompt or as post-processing steps on the symbolic output.
