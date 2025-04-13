@@ -30,7 +30,7 @@ GEMINI_MODEL = "gemini-2.0-flash-thinking-exp-01-21" # Or other suitable models 
 
 # Initial high-level description of the music
 INITIAL_DESCRIPTION = (
-    "A simple, slightly melancholic loopable piano piece suitable for a game background."
+    "Optimistic electro hiphop"
 )
 
 # Define the structure and goals for each section
