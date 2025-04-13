@@ -1,4 +1,4 @@
-# AutoMusic Generator - Project Documentation
+# MidiMaker.pro - Project Documentation
 
 ## 1. Project Overview
 
