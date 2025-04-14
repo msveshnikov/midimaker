@@ -26,13 +26,13 @@ import pretty_midi
 GEMINI_KEY = os.environ.get("GEMINI_KEY", "") # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
-GEMINI_MODEL = "gemini-2.5-pro-preview-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
+GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
 
 # Configuration dictionary
 CONFIG = {
     "api_key": GEMINI_KEY,
     "gemini_model": GEMINI_MODEL,
-    "initial_description": "A fast (160 bpm), optimistic, intellectual, and complex piece of music with a simple melody over block chords. The piece should be in C minor, 4/4 time signature, and feature piano, guitar, and synth lead.",
+    "initial_description": "trans electronic hiphop cosmic ambient music fast 160 bpm optimistic",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
@@ -40,8 +40,8 @@ CONFIG = {
     "generation_retries": 3,
     "generation_delay": 5, # Seconds between retries
     "max_total_bars": 128,  # Limit total length for safety/cost
-    "min_section_bars": 8,   # Minimum bars per generated section
-    "max_section_bars": 32,  # Maximum bars per generated section
+    "min_section_bars": 16, # Minimum bars per generated section
+    "max_section_bars": 32, # Maximum bars per generated section
     "temperature": 0.7, # LLM Temperature for creativity vs predictability
     "safety_settings": { # Configure content safety settings for Gemini
         # Options: BLOCK_NONE, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE, BLOCK_LOW_AND_ABOVE
