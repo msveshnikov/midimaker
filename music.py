@@ -23,7 +23,7 @@ import google.generativeai as genai
 import pretty_midi
 
 # --- Configuration ---
-GEMINI_KEY = os.environ.get("GEMINI_KEY", "") # Placeholder - Replace or use env var
+GEMINI_KEY = os.environ.get("GEMINI_KEY", "")  # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
 GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
@@ -36,14 +36,14 @@ CONFIG = {
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
-    "default_key": "Cmin", # Will likely be overridden by enrichment
+    "default_key": "Cmin",  # Will likely be overridden by enrichment
     "generation_retries": 3,
-    "generation_delay": 5, # Seconds between retries
+    "generation_delay": 5,  # Seconds between retries
     "max_total_bars": 128,  # Limit total length for safety/cost
-    "min_section_bars": 16, # Minimum bars per generated section
-    "max_section_bars": 32, # Maximum bars per generated section
-    "temperature": 0.7, # LLM Temperature for creativity vs predictability
-    "safety_settings": { # Configure content safety settings for Gemini
+    "min_section_bars": 16,  # Minimum bars per generated section
+    "max_section_bars": 32,  # Maximum bars per generated section
+    "temperature": 0.7,  # LLM Temperature for creativity vs predictability
+    "safety_settings": {  # Configure content safety settings for Gemini
         # Options: BLOCK_NONE, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE, BLOCK_LOW_AND_ABOVE
         "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
         "HARM_CATEGORY_HATE_SPEECH": "BLOCK_NONE",
@@ -104,9 +104,7 @@ def configure_genai():
         exit(1)
     try:
         genai.configure(api_key=CONFIG["api_key"])
-        print(
-            f"Google Generative AI configured using model: {CONFIG['gemini_model']}"
-        )
+        print(f"Google Generative AI configured using model: {CONFIG['gemini_model']}")
     except Exception as e:
         print(f"Error configuring Generative AI: {e}")
         print("Please ensure your GEMINI_KEY is set correctly and valid.")
@@ -141,7 +139,7 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
             response = model.generate_content(
                 prompt,
                 generation_config=generation_config,
-                safety_settings=safety_settings
+                safety_settings=safety_settings,
             )
 
             # Debug: Print raw response structure if needed
@@ -161,10 +159,12 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
 
             content = None
             # Check candidates for content, especially if parts is empty or finish reason isn't STOP
-            if hasattr(response, 'candidates') and response.candidates:
+            if hasattr(response, "candidates") and response.candidates:
                 candidate = response.candidates[0]
-                if candidate.finish_reason != 'STOP':
-                    print(f"Generation stopped for reason: {candidate.finish_reason} (Candidate Level) on attempt {attempt + 1}")
+                if candidate.finish_reason != "STOP":
+                    print(
+                        f"Generation stopped for reason: {candidate.finish_reason} (Candidate Level) on attempt {attempt + 1}"
+                    )
                     # Try to get content even if stopped early
                     if candidate.content and candidate.content.parts:
                         print("Attempting to use partial content from candidate.")
@@ -176,22 +176,28 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
                     # Standard case via candidate
                     content = candidate.content.parts[0].text.strip()
                 else:
-                    print(f"Warning: Received response with no usable candidate content (Attempt {attempt + 1}).")
+                    print(
+                        f"Warning: Received response with no usable candidate content (Attempt {attempt + 1})."
+                    )
                     # Fall through to retry logic
 
             # Fallback or primary check via response.parts / response.text
-            elif hasattr(response, 'parts') and response.parts:
+            elif hasattr(response, "parts") and response.parts:
                 content = response.text.strip()
             else:
-                 print(f"Warning: Received response with no parts or candidates (Attempt {attempt + 1}).")
-                 # Fall through to retry logic
+                print(
+                    f"Warning: Received response with no parts or candidates (Attempt {attempt + 1})."
+                )
+                # Fall through to retry logic
 
             # Process the content based on expected format
             if content is not None:
                 if output_format == "json":
                     try:
                         # Remove potential markdown fences before parsing JSON
-                        content_cleaned = re.sub(r"^```json\n", "", content, flags=re.IGNORECASE)
+                        content_cleaned = re.sub(
+                            r"^```json\n", "", content, flags=re.IGNORECASE
+                        )
                         content_cleaned = re.sub(r"\n```$", "", content_cleaned)
                         return json.loads(content_cleaned)
                     except json.JSONDecodeError as json_e:
@@ -201,14 +207,18 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
                         print(f"Received text: {content[:500]}...")
                         # Fall through to retry logic
                 else:
-                     # Remove potential markdown fences from text output
-                    content_cleaned = re.sub(r"^```[a-z]*\n", "", content, flags=re.MULTILINE | re.IGNORECASE)
+                    # Remove potential markdown fences from text output
+                    content_cleaned = re.sub(
+                        r"^```[a-z]*\n",
+                        "",
+                        content,
+                        flags=re.MULTILINE | re.IGNORECASE,
+                    )
                     content_cleaned = re.sub(r"\n```$", "", content_cleaned)
-                    return content_cleaned.strip() # Return cleaned text
+                    return content_cleaned.strip()  # Return cleaned text
 
             # If content is None or JSON parsing failed, log and potentially retry
             print(f"Warning: Could not extract valid content (Attempt {attempt + 1}).")
-
 
         except Exception as e:
             print(
@@ -228,82 +238,279 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
 # --- Music Data Structures and Mappings ---
 
 PITCH_MAP = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
-ACCIDENTAL_MAP = {"#": 1, "S": 1, "B": -1, "": 0} # Allow S for sharp
+ACCIDENTAL_MAP = {"#": 1, "S": 1, "B": -1, "": 0}  # Allow S for sharp
 
-# General MIDI Instrument Program Numbers (Selected)
+# General MIDI Instrument Program Numbers (Expanded Selection)
 INSTRUMENT_PROGRAM_MAP = {
     # Piano
-    "pno": 0, "piano": 0, "acoustic grand piano": 0, "bright acoustic piano": 1,
-    "electric grand piano": 2, "honky-tonk piano": 3, "electric piano 1": 4,
-    "rhodes piano": 4, "electric piano 2": 5,
+    "pno": 0,
+    "piano": 0,
+    "acoustic grand piano": 0,
+    "bright acoustic piano": 1,
+    "electric grand piano": 2,
+    "honky-tonk piano": 3,
+    "electric piano 1": 4,
+    "rhodes piano": 4,
+    "electric piano 2": 5,
     # Chromatic Percussion
-    "celesta": 8, "glockenspiel": 9, "music box": 10, "vibraphone": 11, "marimba": 12, "xylophone": 13,
+    "celesta": 8,
+    "glockenspiel": 9,
+    "music box": 10,
+    "vibraphone": 11,
+    "marimba": 12,
+    "xylophone": 13,
+    "tubular bells": 14,
+    "dulcimer": 15,
     # Organ
-    "org": 16, "organ": 16, "drawbar organ": 16, "percussive organ": 17, "rock organ": 18, "church organ": 19,
+    "org": 16,
+    "organ": 16,
+    "drawbar organ": 16,
+    "percussive organ": 17,
+    "rock organ": 18,
+    "church organ": 19,
+    "reed organ": 20,
+    "accordion": 21,
+    "harmonica": 22,
+    "tango accordion": 23,
     # Guitar
-    "gtr": 25, "acoustic guitar": 25, "nylon guitar": 24, "steel guitar": 25,
-    "electric guitar": 27, "jazz guitar": 26, "clean electric guitar": 27,
-    "muted electric guitar": 28, "overdriven guitar": 29, "distortion guitar": 30,
+    "gtr": 25,
+    "acoustic guitar": 25,
+    "nylon guitar": 24,
+    "steel guitar": 25,
+    "electric guitar": 27,
+    "jazz guitar": 26,
+    "clean electric guitar": 27,
+    "muted electric guitar": 28,
+    "overdriven guitar": 29,
+    "distortion guitar": 30,
+    "guitar harmonics": 31,
     # Bass
-    "bass": 33, "acoustic bass": 32, "electric bass": 33, "finger bass": 33,
-    "pick bass": 34, "fretless bass": 35, "slap bass": 36, "synth bass": 38,
-    "synthbass": 38, "synth bass 2": 39,
+    "bass": 33,
+    "acoustic bass": 32,
+    "electric bass": 33,
+    "finger bass": 33,
+    "pick bass": 34,
+    "fretless bass": 35,
+    "slap bass": 36,
+    "synth bass": 38,
+    "synthbass": 38,
+    "synth bass 2": 39,
     # Strings
-    "str": 48, "strings": 48, "violin": 40, "viola": 41, "cello": 42,
-    "contrabass": 43, "tremolo strings": 44, "pizzicato strings": 45,
-    "orchestral harp": 46, "string ensemble 1": 48, "string ensemble 2": 49,
-    "synth strings 1": 50, "synth strings 2": 51,
+    "str": 48,
+    "strings": 48,
+    "violin": 40,
+    "viola": 41,
+    "cello": 42,
+    "contrabass": 43,
+    "tremolo strings": 44,
+    "pizzicato strings": 45,
+    "orchestral harp": 46,
+    "timpani": 47,
+    "string ensemble 1": 48,
+    "string ensemble 2": 49,
+    "synth strings 1": 50,
+    "synth strings 2": 51,
     # Brass
-    "tpt": 56, "trumpet": 56, "trombone": 57, "tuba": 58, "muted trumpet": 59,
-    "french horn": 60, "brass section": 61,
+    "tpt": 56,
+    "trumpet": 56,
+    "trombone": 57,
+    "tuba": 58,
+    "muted trumpet": 59,
+    "french horn": 60,
+    "brass section": 61,
+    "synth brass 1": 62,
+    "synth brass 2": 63,
     # Reed
-    "sax": 65, "soprano sax": 64, "alto sax": 65, "tenor sax": 66,
-    "baritone sax": 67, "oboe": 68, "english horn": 69, "bassoon": 70, "clarinet": 71,
+    "sax": 65,
+    "soprano sax": 64,
+    "alto sax": 65,
+    "tenor sax": 66,
+    "baritone sax": 67,
+    "oboe": 68,
+    "english horn": 69,
+    "bassoon": 70,
+    "clarinet": 71,
     # Pipe
-    "flt": 73, "flute": 73, "piccolo": 72, "recorder": 74, "pan flute": 75,
+    "flt": 73,
+    "flute": 73,
+    "piccolo": 72,
+    "recorder": 74,
+    "pan flute": 75,
+    "blown bottle": 76,
+    "shakuhachi": 77,
+    "whistle": 78,
+    "ocarina": 79,
     # Synth Lead
-    "synlead": 81, "synth lead": 81, "lead 1 (square)": 80, "lead 2 (sawtooth)": 81,
-    "lead 3 (calliope)": 82, "lead 8 (bass + lead)": 87,
+    "synlead": 81,
+    "synth lead": 81,
+    "lead 1 (square)": 80,
+    "lead 2 (sawtooth)": 81,
+    "lead 3 (calliope)": 82,
+    "lead 4 (chiff)": 83,
+    "lead 5 (charang)": 84,
+    "lead 6 (voice)": 85,
+    "lead 7 (fifths)": 86,
+    "lead 8 (bass + lead)": 87,
     # Synth Pad
-    "synpad": 89, "synth pad": 89, "pad 1 (new age)": 88, "pad 2 (warm)": 89,
-    "pad 3 (polysynth)": 90, "pad 4 (choir)": 91, "pad 5 (bowed)": 92, "pad 6 (metallic)": 93, "pad 7 (halo)": 94,
+    "synpad": 89,
+    "synth pad": 89,
+    "pad 1 (new age)": 88,
+    "pad 2 (warm)": 89,
+    "pad 3 (polysynth)": 90,
+    "pad 4 (choir)": 91,
+    "pad 5 (bowed)": 92,
+    "pad 6 (metallic)": 93,
+    "pad 7 (halo)": 94,
+    "pad 8 (sweep)": 95,
+    # Synth FX
+    "fx 1 (rain)": 96,
+    "fx 2 (soundtrack)": 97,
+    "fx 3 (crystal)": 98,
+    "fx 4 (atmosphere)": 99,
+    "fx 5 (brightness)": 100,
+    "fx 6 (goblins)": 101,
+    "fx 7 (echoes)": 102,
+    "fx 8 (sci-fi)": 103,
+    # Ethnic
+    "sitar": 104,
+    "banjo": 105,
+    "shamisen": 106,
+    "koto": 107,
+    "kalimba": 108,
+    "bag pipe": 109,
+    "fiddle": 110,
+    "shanai": 111,
+    # Percussive
+    "tinkle bell": 112,
+    "agogo": 113,
+    "steel drums": 114,
+    "woodblock": 115, # Note: GM has High/Low on drum channel
+    "taiko drum": 116,
+    "melodic tom": 117,
+    "synth drum": 118,
+    "reverse cymbal": 119,
+    # Sound Effects
+    "guitar fret noise": 120,
+    "breath noise": 121,
+    "seashore": 122,
+    "bird tweet": 123,
+    "telephone ring": 124,
+    "helicopter": 125,
+    "applause": 126,
+    "gunshot": 127,
     # Arp (Mapped to a synth sound)
-    "arp": 81, # Map Arp to Sawtooth Lead by default
+    "arp": 81,  # Map Arp to Sawtooth Lead by default
     # Drums are a special case (channel 10 / index 9) - Program 0 is conventional
-    "drs": 0, "drums": 0, "808drums": 0, "drumkit": 0,
+    "drs": 0,
+    "drums": 0,
+    "808drums": 0,
+    "drumkit": 0,
 }
 # Set of lowercase names for checking INST if it's a drum track
-DRUM_INSTRUMENT_NAMES = {k for k, v in INSTRUMENT_PROGRAM_MAP.items() if v == 0 and ('dr' in k or 'kit' in k)}
+DRUM_INSTRUMENT_NAMES = {
+    k
+    for k, v in INSTRUMENT_PROGRAM_MAP.items()
+    if v == 0 and ("dr" in k or "kit" in k)
+}
 
-# Standard drum note map (MIDI channel 10 / index 9) - Keys MUST be lowercase for lookup
+# Standard drum note map (MIDI channel 10 / index 9) - Keys MUST be lowercase for lookup (Expanded)
 DRUM_PITCH_MAP = {
     # Bass Drum
-    "kick": 36, "bd": 36, "bass drum 1": 36, "acoustic bass drum": 35,
+    "kick": 36,
+    "bd": 36,
+    "bass drum 1": 36,
+    "bass drum": 36,
+    "acoustic bass drum": 35,
+    "kick 2": 35,
     # Snare
-    "snare": 38, "sd": 38, "acoustic snare": 38, "electric snare": 40,
+    "snare": 38,
+    "sd": 38,
+    "acoustic snare": 38,
+    "electric snare": 40,
     # Hi-Hat
-    "hihatclosed": 42, "hhc": 42, "closed hi hat": 42, "closed hi-hat": 42,
-    "hihatopen": 46, "hho": 46, "open hi hat": 46, "open hi-hat": 46,
-    "hihatpedal": 44, "hh p": 44, "pedal hi hat": 44, "pedal hi-hat": 44,
+    "hihatclosed": 42,
+    "hhc": 42,
+    "closed hi hat": 42,
+    "closed hi-hat": 42,
+    "hihatopen": 46,
+    "hho": 46,
+    "open hi hat": 46,
+    "open hi-hat": 46,
+    "hihatpedal": 44,
+    "hhp": 44,
+    "pedal hi hat": 44,
+    "pedal hi-hat": 44,
     # Cymbals
-    "crash": 49, "cr": 49, "crash cymbal 1": 49, "crash cymbal 2": 57,
-    "ride": 51, "rd": 51, "ride cymbal 1": 51, "ride cymbal 2": 59,
-    "ride bell": 53, "splash cymbal": 55, "chinese cymbal": 52,
+    "crash": 49,
+    "cr": 49,
+    "crash cymbal 1": 49,
+    "crash cymbal 2": 57,
+    "ride": 51,
+    "rd": 51,
+    "ride cymbal 1": 51,
+    "ride cymbal 2": 59,
+    "ride bell": 53,
+    "rb": 53,
+    "splash cymbal": 55,
+    "splash": 55,
+    "chinese cymbal": 52,
+    "chinese": 52,
+    "reverse cymbal": 119, # Also available as effect
     # Toms
-    "high tom": 50, "ht": 50, "hi tom": 50,
-    "mid tom": 47, "mt": 47, "hi-mid tom": 48, "low-mid tom": 47,
-    "low tom": 43, "lt": 43, "high floor tom": 43, "low floor tom": 41,
-    "floor tom": 41, "ft": 41,
-    # Other
-    "rimshot": 37, "rs": 37, "side stick": 37,
-    "clap": 39, "cp": 39, "hand clap": 39,
-    "cowbell": 56, "cb": 56,
-    "tambourine": 54, "tmb": 54,
-    "claves": 75, "wood block": 76, "high wood block": 76, "low wood block": 77,
+    "high tom": 50,
+    "ht": 50,
+    "hi tom": 50,
+    "mid tom": 47,
+    "mt": 47,
+    "hi-mid tom": 48,
+    "low-mid tom": 47,
+    "low tom": 43,
+    "lt": 43,
+    "high floor tom": 43,
+    "low floor tom": 41,
+    "floor tom": 41,
+    "ft": 41,
+    # Hand Percussion
+    "rimshot": 37,
+    "rs": 37,
+    "side stick": 37,
+    "clap": 39,
+    "cp": 39,
+    "hand clap": 39,
+    "cowbell": 56,
+    "cb": 56,
+    "tambourine": 54,
+    "tmb": 54,
+    "vibraslap": 58,
+    "high bongo": 60,
+    "low bongo": 61,
+    "mute high conga": 62,
+    "open high conga": 63,
+    "low conga": 64,
+    "high timbale": 65,
+    "low timbale": 66,
+    "high agogo": 67,
+    "low agogo": 68,
+    "cabasa": 69,
+    "maracas": 70,
+    "short whistle": 71,
+    "long whistle": 72,
+    "short guiro": 73,
+    "long guiro": 74,
+    "claves": 75,
+    "cl": 75,
+    "high wood block": 76,
+    "low wood block": 77,
+    "mute cuica": 78,
+    "open cuica": 79,
+    "mute triangle": 80,
+    "open triangle": 81,
+    "shaker": 82, # Common mapping
 }
 
 # Store the result of pitch_to_midi to avoid re-parsing invalid names repeatedly
 _pitch_parse_cache = {}
+
 
 def pitch_to_midi(pitch_name):
     """Converts pitch name (e.g., C4, F#5, Gb3) to MIDI number. Returns None if invalid."""
@@ -311,7 +518,9 @@ def pitch_to_midi(pitch_name):
     if pitch_name in _pitch_parse_cache:
         return _pitch_parse_cache[pitch_name]
 
-    match = re.match(r"([A-G])([#sb]?)(\-?\d+)", pitch_name, re.IGNORECASE) # Allow 's' for sharp
+    match = re.match(
+        r"([A-G])([#sb]?)(\-?\d+)", pitch_name, re.IGNORECASE
+    )  # Allow 's' for sharp
     if not match:
         # print(f"Debug: Could not parse pitch name: '{pitch_name}'") # Too verbose
         _pitch_parse_cache[pitch_name] = None
@@ -324,17 +533,16 @@ def pitch_to_midi(pitch_name):
         _pitch_parse_cache[pitch_name] = None
         return None
 
-
     base_midi = PITCH_MAP.get(note.upper())
     if base_midi is None:
         # print(f"Warning: Invalid note name: '{note}'.") # Too verbose
-         _pitch_parse_cache[pitch_name] = None
-         return None
+        _pitch_parse_cache[pitch_name] = None
+        return None
 
     # Normalize accidentals: 's' becomes '#'
-    acc_norm = acc.upper() if acc else ''
-    if acc_norm == 'S':
-        acc_norm = '#'
+    acc_norm = acc.upper() if acc else ""
+    if acc_norm == "S":
+        acc_norm = "#"
 
     acc_val = ACCIDENTAL_MAP.get(acc_norm, 0)
     midi_val = base_midi + acc_val + (octave + 1) * 12
@@ -364,7 +572,12 @@ def duration_to_seconds(duration_symbol, tempo, time_sig_denominator=4):
         quarter_note_duration_sec = 60.0 / beats_per_minute
 
         duration_map = {
-            "W": 4.0, "H": 2.0, "Q": 1.0, "E": 0.5, "S": 0.25, "T": 0.125,
+            "W": 4.0,
+            "H": 2.0,
+            "Q": 1.0,
+            "E": 0.5,
+            "S": 0.25,
+            "T": 0.125,
         }
 
         base_symbol = duration_symbol.replace(".", "")
@@ -426,17 +639,23 @@ def enrich_music_description(description):
         # Use more robust regex to find parameters anywhere in the text
         key_match = re.search(
             r"[Kk](?:ey)?\s*:\s*([A-Ga-g][#sb]?(?:maj|min|dor|phr|lyd|mix|loc|aeo|ion)?)",
-            enriched, re.IGNORECASE
+            enriched,
+            re.IGNORECASE,
         )
         tempo_match = re.search(r"[Tt](?:empo)?\s*:\s*(\d+)", enriched)
-        ts_match = re.search(r"[Tt](?:ime)?\s*[Ss](?:ig)?\s*:\s*(\d+)\s*/\s*(\d+)", enriched)
-        inst_match = re.search(r"INST\s*:\s*(\w+)", enriched, re.IGNORECASE) # Look for INST specifically if possible
+        ts_match = re.search(
+            r"[Tt](?:ime)?\s*[Ss](?:ig)?\s*:\s*(\d+)\s*/\s*(\d+)", enriched
+        )
+        inst_match = re.search(
+            r"INST\s*:\s*(\w+)", enriched, re.IGNORECASE
+        )  # Look for INST specifically if possible
         if not inst_match:
-             # Look for common instrument names if INST: tag is missing
-             inst_match = re.search(
-                 r"(?:instrument(?:s|ation)?|primary inst)\s*:\s*([A-Za-z]+(?:[ ][A-Za-z]+)*)",
-                 enriched, re.IGNORECASE
-             )
+            # Look for common instrument names if INST: tag is missing
+            inst_match = re.search(
+                r"(?:instrument(?:s|ation)?|primary inst)\s*:\s*([A-Za-z]+(?:[ ][A-Za-z]+)*)",
+                enriched,
+                re.IGNORECASE,
+            )
         struct_match = re.search(
             r"[Ss]tructure\s*:\s*([\w\-]+)", enriched, re.IGNORECASE
         )
@@ -448,29 +667,35 @@ def enrich_music_description(description):
         if tempo_match:
             try:
                 tempo_val = int(tempo_match.group(1))
-                if 5 <= tempo_val <= 300: # Plausible tempo range
+                if 5 <= tempo_val <= 300:  # Plausible tempo range
                     current_tempo = tempo_val
                     print(f"Updated Default Tempo: {current_tempo}")
                 else:
-                    print(f"Warning: Ignoring extracted tempo {tempo_val} (out of range 5-300).")
+                    print(
+                        f"Warning: Ignoring extracted tempo {tempo_val} (out of range 5-300)."
+                    )
             except ValueError:
                 pass
         if ts_match:
             try:
                 ts_num, ts_den = int(ts_match.group(1)), int(ts_match.group(2))
                 # Basic validation for common time signatures
-                if ts_num > 0 and ts_den > 0 and (ts_den & (ts_den - 1) == 0 or ts_den == 1): # Power of 2 or 1
+                if ts_num > 0 and ts_den > 0 and (ts_den & (ts_den - 1) == 0 or ts_den == 1):  # Power of 2 or 1
                     current_timesig = (ts_num, ts_den)
-                    print(f"Updated Default Time Signature: {current_timesig[0]}/{current_timesig[1]}")
+                    print(
+                        f"Updated Default Time Signature: {current_timesig[0]}/{current_timesig[1]}"
+                    )
                 else:
-                    print(f"Warning: Ignoring extracted time signature {ts_num}/{ts_den} (invalid denominator).")
+                    print(
+                        f"Warning: Ignoring extracted time signature {ts_num}/{ts_den} (invalid denominator)."
+                    )
             except ValueError:
                 pass
         if inst_match:
             primary_instrument = inst_match.group(1).strip()
             print(f"Identified Primary Instrument Hint: {primary_instrument}")
         if struct_match:
-            structure_hint = struct_match.group(1).upper() # Standardize structure hint
+            structure_hint = struct_match.group(1).upper()  # Standardize structure hint
             print(f"Identified Structure Hint: {structure_hint}")
 
         # Update CONFIG with potentially changed defaults for subsequent steps
@@ -526,14 +751,15 @@ Generate ONLY the JSON plan now, starting with {{ and ending with }}. Do not inc
                 and "bars" in info
                 and isinstance(info["bars"], int)
                 and "goal" in info
-                and isinstance(info["goal"], str) and info["goal"].strip()
+                and isinstance(info["goal"], str)
+                and info["goal"].strip()
                 and CONFIG["min_section_bars"]
                 <= info["bars"]
                 <= CONFIG["max_section_bars"]
             ):
                 if total_bars + info["bars"] <= CONFIG["max_total_bars"]:
                     # Ensure goal is not excessively long
-                    info["goal"] = info["goal"].strip()[:200] # Limit goal length
+                    info["goal"] = info["goal"].strip()[:200]  # Limit goal length
                     validated_plan[section_name] = info
                     total_bars += info["bars"]
                 else:
@@ -550,7 +776,9 @@ Generate ONLY the JSON plan now, starting with {{ and ending with }}. Do not inc
                 # Continue validating other sections if possible
 
         if not validated_plan:
-            print("ERROR: Failed to generate a valid section plan from LLM response. Cannot proceed.")
+            print(
+                "ERROR: Failed to generate a valid section plan from LLM response. Cannot proceed."
+            )
             return None
 
         print("Generated Section Plan:")
@@ -562,14 +790,20 @@ Generate ONLY the JSON plan now, starting with {{ and ending with }}. Do not inc
         # Return validated plan with potentially preserved order
         return {name: validated_plan[name] for name in final_section_order}
     else:
-        print("ERROR: Failed to generate or parse section plan JSON from LLM. Cannot proceed.")
-        if isinstance(plan_json, str): # Log if we got string instead of JSON
+        print(
+            "ERROR: Failed to generate or parse section plan JSON from LLM. Cannot proceed."
+        )
+        if isinstance(plan_json, str):  # Log if we got string instead of JSON
             print(f"LLM Output (expected JSON):\n{plan_json[:500]}...")
         return None
 
 
 def generate_symbolic_section(
-    overall_desc, section_plan, section_name, current_bar, previous_section_summary=None
+    overall_desc,
+    section_plan,
+    section_name,
+    current_bar,
+    previous_section_summary=None,
 ):
     """Step 3: Generate symbolic music for one section using LLM."""
     print(
@@ -625,13 +859,17 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
 
     if symbolic_text:
         # Basic cleaning (already done in call_gemini, but good practice)
-        symbolic_text = re.sub(r"^```[a-z]*\n", "", symbolic_text, flags=re.MULTILINE | re.IGNORECASE)
+        symbolic_text = re.sub(
+            r"^```[a-z]*\n", "", symbolic_text, flags=re.MULTILINE | re.IGNORECASE
+        )
         symbolic_text = re.sub(r"\n```$", "", symbolic_text)
         symbolic_text = symbolic_text.strip()
 
         # Validate start and content
         lines = symbolic_text.split("\n")
-        meaningful_lines = [line.strip() for line in lines if line.strip() and not line.strip().startswith("#")]
+        meaningful_lines = [
+            line.strip() for line in lines if line.strip() and not line.strip().startswith("#")
+        ]
 
         if not meaningful_lines:
             print(
@@ -643,12 +881,16 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
         bar_marker = f"BAR:{current_bar}"
 
         # Check if the expected BAR marker is present *somewhere*
-        bar_marker_found = any(line.strip().startswith(bar_marker) for line in meaningful_lines)
+        bar_marker_found = any(
+            line.strip().startswith(bar_marker) for line in meaningful_lines
+        )
 
         if not bar_marker_found:
-             print(f"ERROR: Generated text for {section_name} does not contain the expected start marker '{bar_marker}'. Discarding section.")
-             print(f"Received text (first 500 chars):\n{symbolic_text[:500]}...")
-             return "", None
+            print(
+                f"ERROR: Generated text for {section_name} does not contain the expected start marker '{bar_marker}'. Discarding section."
+            )
+            print(f"Received text (first 500 chars):\n{symbolic_text[:500]}...")
+            return "", None
 
         # Find the index of the first valid starting line (T, TS, K, INST, or the correct BAR)
         start_index = -1
@@ -661,27 +903,32 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
                 break
             else:
                 # Found unexpected content before a valid start command or BAR marker
-                print(f"Warning: Generated text for {section_name} had unexpected content before first valid command or '{bar_marker}'. Trimming preamble.")
+                print(
+                    f"Warning: Generated text for {section_name} had unexpected content before first valid command or '{bar_marker}'. Trimming preamble."
+                )
                 # We will start from the first valid command or BAR marker found later
-                break # Stop searching here
+                break  # Stop searching here
 
         # If we didn't find a valid start line immediately, find the first occurrence
         if start_index == -1:
-             for idx, line in enumerate(lines):
-                 line_content = line.strip()
-                 if re.match(r"^(T:|TS:|K:|INST:)", line_content, re.IGNORECASE) or line_content.startswith(bar_marker):
-                     start_index = idx
-                     print(f"Adjusted start index for {section_name} to line {start_index + 1}.")
-                     break
+            for idx, line in enumerate(lines):
+                line_content = line.strip()
+                if re.match(r"^(T:|TS:|K:|INST:)", line_content, re.IGNORECASE) or line_content.startswith(bar_marker):
+                    start_index = idx
+                    print(
+                        f"Adjusted start index for {section_name} to line {start_index + 1}."
+                    )
+                    break
 
         if start_index == -1:
-             # Should be unreachable due to bar_marker_found check, but defensive coding
-             print(f"ERROR: Could not find any valid starting line (T/TS/K/INST/BAR) in {section_name}. Discarding section.")
-             return "", None
+            # Should be unreachable due to bar_marker_found check, but defensive coding
+            print(
+                f"ERROR: Could not find any valid starting line (T/TS/K/INST/BAR) in {section_name}. Discarding section."
+            )
+            return "", None
 
         # Reconstruct the text from the valid start index
         symbolic_text = "\n".join(lines[start_index:])
-
 
         print(
             f"Generated symbolic text for Section {section_name} (first 300 chars):\n{symbolic_text[:300]}...\n"
@@ -692,9 +939,9 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
         summary_info = {
             "name": section_name,
             "summary": f"Generated {bars} bars targeting goal: {goal}.",
-            "key": default_key, # Placeholder - actual key might change
-            "tempo": default_tempo, # Placeholder
-            "time_sig": f"{default_timesig[0]}/{default_timesig[1]}" # Placeholder
+            "key": default_key,  # Placeholder - actual key might change
+            "tempo": default_tempo,  # Placeholder
+            "time_sig": f"{default_timesig[0]}/{default_timesig[1]}",  # Placeholder
         }
         # Attempt to find last specified K, T, TS in this section for better context
         last_k = default_key
@@ -704,14 +951,15 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
             line = line.strip()
             if line.startswith("K:"):
                 last_k = line.split(":", 1)[1].strip()
-                break # Found most recent K
+                break  # Found most recent K
         for line in reversed(symbolic_text.split("\n")):
             line = line.strip()
             if line.startswith("T:"):
-                 try:
-                     last_t = float(line.split(":", 1)[1].strip())
-                     break
-                 except ValueError: pass
+                try:
+                    last_t = float(line.split(":", 1)[1].strip())
+                    break
+                except ValueError:
+                    pass
         for line in reversed(symbolic_text.split("\n")):
             line = line.strip()
             if line.startswith("TS:"):
@@ -720,7 +968,6 @@ Generate Section {section_name} symbolic music now (starting BAR:{current_bar}):
         summary_info["key"] = last_k
         summary_info["tempo"] = last_t
         summary_info["time_sig"] = last_ts
-
 
         return symbolic_text, summary_info
     else:
@@ -735,26 +982,34 @@ def parse_symbolic_to_structured_data(symbolic_text):
     tempo_changes = []
     time_signature_changes = []
     key_signature_changes = []
-    instrument_definitions = {} # Key: (inst_name_lower, track_id), Value: {program, is_drum, name, orig_inst_name}
+    instrument_definitions = (
+        {}
+    )  # Key: (inst_name_lower, track_id), Value: {program, is_drum, name, orig_inst_name}
 
     # State variables
-    current_track_times = {} # Key: (inst_name_lower, track_id), Value: current time cursor for this track
-    current_global_time = 0.0 # Tracks the latest event time across all tracks, adjusted by BAR markers
+    current_track_times = (
+        {}
+    )  # Key: (inst_name_lower, track_id), Value: current time cursor for this track
+    current_global_time = (
+        0.0  # Tracks the latest event time across all tracks, adjusted by BAR markers
+    )
 
     current_tempo = float(CONFIG["default_tempo"])
     current_ts_num, current_ts_den = CONFIG["default_timesig"]
     current_key = CONFIG["default_key"]
-    active_instrument_name_orig = "Pno" # Original case name
-    active_instrument_name_lower = "pno" # Lowercase for lookups
+    active_instrument_name_orig = "Pno"  # Original case name
+    active_instrument_name_lower = "pno"  # Lowercase for lookups
     active_instrument_is_drum = False
 
     current_bar_number = 0
-    current_bar_start_time = 0.0 # Global time when the current bar started
-    time_within_bar_per_track = {} # Key: (inst_name_lower, track_id), Value: time elapsed within the current bar for this track
+    current_bar_start_time = 0.0  # Global time when the current bar started
+    time_within_bar_per_track = (
+        {}
+    )  # Key: (inst_name_lower, track_id), Value: time elapsed within the current bar for this track
     expected_bar_duration_sec = (
         (60.0 / current_tempo) * current_ts_num * (4.0 / current_ts_den)
     )
-    last_event_end_time = 0.0 # Tracks the absolute end time of the last note/rest
+    last_event_end_time = 0.0  # Tracks the absolute end time of the last note/rest
 
     initial_commands_set = {"T": False, "TS": False, "K": False}
     lines = symbolic_text.strip().split("\n")
@@ -768,7 +1023,7 @@ def parse_symbolic_to_structured_data(symbolic_text):
             continue
         if line.startswith("BAR:"):
             parse_start_line_index = i
-            break # Stop pre-pass when BAR is encountered
+            break  # Stop pre-pass when BAR is encountered
 
         parts = line.split(":", 1)
         command = parts[0].upper()
@@ -780,7 +1035,9 @@ def parse_symbolic_to_structured_data(symbolic_text):
                 if value:
                     active_instrument_name_orig = value
                     active_instrument_name_lower = value.lower()
-                    active_instrument_is_drum = active_instrument_name_lower in DRUM_INSTRUMENT_NAMES
+                    active_instrument_is_drum = (
+                        active_instrument_name_lower in DRUM_INSTRUMENT_NAMES
+                    )
                     print(
                         f"Initial Instrument context set to '{active_instrument_name_orig}' (Is Drum: {active_instrument_is_drum})"
                     )
@@ -858,26 +1115,32 @@ def parse_symbolic_to_structured_data(symbolic_text):
                 if value:
                     active_instrument_name_orig = value
                     active_instrument_name_lower = value.lower()
-                    active_instrument_is_drum = active_instrument_name_lower in DRUM_INSTRUMENT_NAMES
+                    active_instrument_is_drum = (
+                        active_instrument_name_lower in DRUM_INSTRUMENT_NAMES
+                    )
                     # Don't print every INST change, can be verbose
             elif command == "T":
                 new_tempo = float(value)
-                if new_tempo > 0 and abs(new_tempo - current_tempo) > 1e-3: # Avoid tiny float diffs
+                if new_tempo > 0 and abs(new_tempo - current_tempo) > 1e-3:  # Avoid tiny float diffs
                     # Use current_global_time, which reflects bar starts
                     event_time = current_global_time
                     # Add only if time or value differs from the last entry
-                    if not tempo_changes or abs(tempo_changes[-1][0] - event_time) > 1e-6 or abs(tempo_changes[-1][1] - new_tempo) > 1e-3:
-                         tempo_changes.append((event_time, new_tempo))
-                         current_tempo = new_tempo
-                         expected_bar_duration_sec = (
-                             (60.0 / current_tempo)
-                             * current_ts_num
-                             * (4.0 / current_ts_den)
-                         )
-                         print(
-                             f"Time {event_time:.3f}s (Bar ~{current_bar_number}): Tempo change to {new_tempo} BPM"
-                         )
-                    current_tempo = new_tempo # Update state even if not added (e.g., same time)
+                    if (
+                        not tempo_changes
+                        or abs(tempo_changes[-1][0] - event_time) > 1e-6
+                        or abs(tempo_changes[-1][1] - new_tempo) > 1e-3
+                    ):
+                        tempo_changes.append((event_time, new_tempo))
+                        current_tempo = new_tempo
+                        expected_bar_duration_sec = (
+                            (60.0 / current_tempo)
+                            * current_ts_num
+                            * (4.0 / current_ts_den)
+                        )
+                        print(
+                            f"Time {event_time:.3f}s (Bar ~{current_bar_number}): Tempo change to {new_tempo} BPM"
+                        )
+                    current_tempo = new_tempo  # Update state even if not added (e.g., same time)
 
             elif command == "TS":
                 num_str, den_str = value.split("/")
@@ -888,7 +1151,12 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     and (new_ts_num, new_ts_den) != (current_ts_num, current_ts_den)
                 ):
                     event_time = current_global_time
-                    if not time_signature_changes or abs(time_signature_changes[-1][0] - event_time) > 1e-6 or (time_signature_changes[-1][1], time_signature_changes[-1][2]) != (new_ts_num, new_ts_den):
+                    if (
+                        not time_signature_changes
+                        or abs(time_signature_changes[-1][0] - event_time) > 1e-6
+                        or (time_signature_changes[-1][1], time_signature_changes[-1][2])
+                        != (new_ts_num, new_ts_den)
+                    ):
                         time_signature_changes.append(
                             (event_time, new_ts_num, new_ts_den)
                         )
@@ -901,40 +1169,61 @@ def parse_symbolic_to_structured_data(symbolic_text):
                         print(
                             f"Time {event_time:.3f}s (Bar ~{current_bar_number}): Time Sig change to {new_ts_num}/{new_ts_den}"
                         )
-                    current_ts_num, current_ts_den = new_ts_num, new_ts_den # Update state
+                    current_ts_num, current_ts_den = (
+                        new_ts_num,
+                        new_ts_den,
+                    )  # Update state
 
             elif command == "K":
                 if value and value != current_key:
                     event_time = current_global_time
-                    if not key_signature_changes or abs(key_signature_changes[-1][0] - event_time) > 1e-6 or key_signature_changes[-1][1] != value:
+                    if (
+                        not key_signature_changes
+                        or abs(key_signature_changes[-1][0] - event_time) > 1e-6
+                        or key_signature_changes[-1][1] != value
+                    ):
                         key_signature_changes.append((event_time, value))
                         current_key = value
                         print(
                             f"Time {event_time:.3f}s (Bar ~{current_bar_number}): Key change to {current_key}"
                         )
-                    current_key = value # Update state
+                    current_key = value  # Update state
 
             elif command == "BAR":
                 bar_number = int(value)
                 # Calculate expected start time of this new bar based on previous bar's end
-                expected_new_bar_start_time = current_bar_start_time + expected_bar_duration_sec if current_bar_number > 0 else 0.0
+                expected_new_bar_start_time = (
+                    current_bar_start_time + expected_bar_duration_sec
+                    if current_bar_number > 0
+                    else 0.0
+                )
 
                 # Check timing accuracy of the previous bar before moving to the new one
                 if current_bar_number > 0:
                     max_accumulated_time_in_prev_bar = 0.0
-                    for track_key, accumulated_time in time_within_bar_per_track.items():
-                        max_accumulated_time_in_prev_bar = max(max_accumulated_time_in_prev_bar, accumulated_time)
+                    for (
+                        track_key,
+                        accumulated_time,
+                    ) in time_within_bar_per_track.items():
+                        max_accumulated_time_in_prev_bar = max(
+                            max_accumulated_time_in_prev_bar, accumulated_time
+                        )
 
                     # Allow a small tolerance for floating point comparisons
                     # Tolerance: 1% of bar duration or 5ms, whichever is larger
                     tolerance = max(0.005, expected_bar_duration_sec * 0.01)
-                    duration_error = max_accumulated_time_in_prev_bar - expected_bar_duration_sec
+                    duration_error = (
+                        max_accumulated_time_in_prev_bar - expected_bar_duration_sec
+                    )
 
                     # Check if ANY track significantly overran the bar
                     overran = duration_error > tolerance
                     # Check if ALL tracks significantly underran the bar (might be intentional silence at end)
                     all_underran = True
-                    for track_key, accumulated_time in time_within_bar_per_track.items():
+                    for (
+                        track_key,
+                        accumulated_time,
+                    ) in time_within_bar_per_track.items():
                         if accumulated_time > expected_bar_duration_sec - tolerance:
                             all_underran = False
                             break
@@ -947,18 +1236,19 @@ def parse_symbolic_to_structured_data(symbolic_text):
                         )
                         # Force global time to the expected start time
                         current_global_time = expected_new_bar_start_time
-                    elif all_underran and max_accumulated_time_in_prev_bar > 0: # Avoid warning if bar was empty
-                         print(
+                    elif (
+                        all_underran and max_accumulated_time_in_prev_bar > 0
+                    ):  # Avoid warning if bar was empty
+                        print(
                             f"Warning: Bar {current_bar_number} timing potentially short on Line {current_line_num}. "
                             f"Expected duration {expected_bar_duration_sec:.3f}s, max accumulated {max_accumulated_time_in_prev_bar:.3f}s "
                             f"(Short by: {-duration_error:.3f}s > tolerance {tolerance:.3f}s). Setting bar {bar_number} start to expected time {expected_new_bar_start_time:.3f}s."
-                         )
-                         # Force global time to the expected start time
-                         current_global_time = expected_new_bar_start_time
+                        )
+                        # Force global time to the expected start time
+                        current_global_time = expected_new_bar_start_time
                     else:
                         # If within tolerance or correctly filled, use the expected time to avoid drift
                         current_global_time = expected_new_bar_start_time
-
 
                 # Handle jumps in bar numbers (more than 1 bar increment)
                 bars_jumped = bar_number - (current_bar_number + 1)
@@ -969,16 +1259,19 @@ def parse_symbolic_to_structured_data(symbolic_text):
                         f"Warning: Jump detected from Bar {current_bar_number} to {bar_number} (Line {current_line_num}). "
                         f"Advancing global time by ~{jump_duration:.3f}s ({bars_jumped} bars)."
                     )
-                    current_global_time += jump_duration # Add estimated time for skipped bars
+                    current_global_time += jump_duration  # Add estimated time for skipped bars
 
                 # Update bar state
                 current_bar_number = bar_number
                 current_bar_start_time = current_global_time
                 # Reset time within the new bar for all tracks
-                time_within_bar_per_track = {key: 0.0 for key in time_within_bar_per_track}
+                time_within_bar_per_track = {
+                    key: 0.0 for key in time_within_bar_per_track
+                }
                 # Sync individual track cursors to the new bar start time
-                current_track_times = {key: current_bar_start_time for key in current_track_times}
-
+                current_track_times = {
+                    key: current_bar_start_time for key in current_track_times
+                }
 
             elif command in ["N", "C", "R"]:
                 if current_bar_number == 0:
@@ -988,18 +1281,21 @@ def parse_symbolic_to_structured_data(symbolic_text):
                             f"Warning: Event '{line}' on Line {current_line_num} found before first BAR marker. Processing at time 0."
                         )
                         # Ensure bar state is initialized if events occur before BAR:1
-                        current_bar_number = 1 # Assume Bar 1 implicitly starts
+                        current_bar_number = 1  # Assume Bar 1 implicitly starts
                         current_bar_start_time = 0.0
                         current_global_time = 0.0
                     else:
                         # This case should theoretically not happen if BAR handling is correct
-                         print(f"Internal Warning: Event processing while current_bar_number is 0 despite BAR markers existing. Line {current_line_num}: '{line}'")
-
+                        print(
+                            f"Internal Warning: Event processing while current_bar_number is 0 despite BAR markers existing. Line {current_line_num}: '{line}'"
+                        )
 
                 inst_name_for_event_lower = active_instrument_name_lower
                 inst_name_for_event_orig = active_instrument_name_orig
                 is_drum_track_for_event = active_instrument_is_drum
-                inst_track_key = None # Will be set below based on command (inst_name_lower, track_id)
+                inst_track_key = (
+                    None  # Will be set below based on command (inst_name_lower, track_id)
+                )
 
                 event_duration_sec = 0.0
                 event_start_time = 0.0
@@ -1009,7 +1305,9 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     # N:<Track>:<Pitch>:<Duration>:<Velocity>
                     data_parts = value.split(":")
                     if len(data_parts) < 4:
-                        print(f"Warning: Malformed N command on Line {current_line_num}: '{line}'. Requires 4 parts. Skipping.")
+                        print(
+                            f"Warning: Malformed N command on Line {current_line_num}: '{line}'. Requires 4 parts. Skipping."
+                        )
                         continue
 
                     track_id = data_parts[0].strip()
@@ -1017,26 +1315,39 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     duration_sym_raw = data_parts[2].strip()
                     velocity_str_raw = data_parts[3].strip()
 
-                    if not track_id or not pitch_name_raw or not duration_sym_raw or not velocity_str_raw:
-                         print(f"Warning: Empty part in N command on Line {current_line_num}: '{line}'. Skipping.")
-                         continue
+                    if (
+                        not track_id
+                        or not pitch_name_raw
+                        or not duration_sym_raw
+                        or not velocity_str_raw
+                    ):
+                        print(
+                            f"Warning: Empty part in N command on Line {current_line_num}: '{line}'. Skipping."
+                        )
+                        continue
 
                     # Clean potential comments from last part (velocity)
-                    velocity_str = velocity_str_raw.split('#', 1)[0].strip()
-                    duration_sym = duration_sym_raw # Assume no comments in duration
+                    velocity_str = velocity_str_raw.split("#", 1)[0].strip()
+                    duration_sym = duration_sym_raw  # Assume no comments in duration
 
                     inst_track_key = (inst_name_for_event_lower, track_id)
 
                     try:
                         velocity = int(velocity_str)
                         if not 0 <= velocity <= 127:
-                            print(f"Warning: Velocity {velocity} out of range (0-127) on Line {current_line_num}. Clamping.")
+                            print(
+                                f"Warning: Velocity {velocity} out of range (0-127) on Line {current_line_num}. Clamping."
+                            )
                             velocity = max(0, min(127, velocity))
                     except ValueError:
-                        velocity = 90 # Default velocity for notes
-                        print(f"Warning: Invalid velocity '{velocity_str_raw}' on Line {current_line_num}. Using {velocity}.")
+                        velocity = 90  # Default velocity for notes
+                        print(
+                            f"Warning: Invalid velocity '{velocity_str_raw}' on Line {current_line_num}. Using {velocity}."
+                        )
 
-                    event_duration_sec = duration_to_seconds(duration_sym, current_tempo, current_ts_den)
+                    event_duration_sec = duration_to_seconds(
+                        duration_sym, current_tempo, current_ts_den
+                    )
                     midi_pitch = None
 
                     if is_drum_track_for_event:
@@ -1046,21 +1357,31 @@ def parse_symbolic_to_structured_data(symbolic_text):
                             # Try parsing as standard pitch if not a known drum name
                             standard_pitch = pitch_to_midi(pitch_name_raw)
                             if standard_pitch is not None:
-                                print(f"Warning: Standard pitch notation '{pitch_name_raw}' used on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using MIDI pitch {standard_pitch}.")
+                                print(
+                                    f"Warning: Standard pitch notation '{pitch_name_raw}' used on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using MIDI pitch {standard_pitch}."
+                                )
                                 midi_pitch = standard_pitch
                             else:
-                                print(f"Warning: Unknown drum sound '{pitch_name_raw}' on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using Kick (36).")
-                                midi_pitch = 36 # Default to Kick
+                                print(
+                                    f"Warning: Unknown drum sound '{pitch_name_raw}' on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using Kick (36)."
+                                )
+                                midi_pitch = 36  # Default to Kick
                     else:
                         midi_pitch = pitch_to_midi(pitch_name_raw)
                         if midi_pitch is None:
-                             print(f"Warning: Could not parse pitch name '{pitch_name_raw}' on non-drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Skipping note.")
-                             continue # Skip this note if pitch is invalid
+                            print(
+                                f"Warning: Could not parse pitch name '{pitch_name_raw}' on non-drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Skipping note."
+                            )
+                            continue  # Skip this note if pitch is invalid
 
                     # Get current time for this specific track/instrument combination
                     # Start time is the later of the global bar start time or the track's last event end time
-                    track_specific_start_offset = time_within_bar_per_track.get(inst_track_key, 0.0)
-                    event_start_time = current_bar_start_time + track_specific_start_offset
+                    track_specific_start_offset = time_within_bar_per_track.get(
+                        inst_track_key, 0.0
+                    )
+                    event_start_time = (
+                        current_bar_start_time + track_specific_start_offset
+                    )
 
                     note_event = {
                         "pitch": midi_pitch,
@@ -1075,7 +1396,9 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     # C:<Track>:<[Pitches]>:<Duration>:<Velocity>
                     data_parts = value.split(":")
                     if len(data_parts) < 4:
-                        print(f"Warning: Malformed C command on Line {current_line_num}: '{line}'. Requires 4 parts. Skipping.")
+                        print(
+                            f"Warning: Malformed C command on Line {current_line_num}: '{line}'. Requires 4 parts. Skipping."
+                        )
                         continue
 
                     track_id = data_parts[0].strip()
@@ -1083,12 +1406,19 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     duration_sym_raw = data_parts[2].strip()
                     velocity_str_raw = data_parts[3].strip()
 
-                    if not track_id or not pitches_str_raw or not duration_sym_raw or not velocity_str_raw:
-                         print(f"Warning: Empty part in C command on Line {current_line_num}: '{line}'. Skipping.")
-                         continue
+                    if (
+                        not track_id
+                        or not pitches_str_raw
+                        or not duration_sym_raw
+                        or not velocity_str_raw
+                    ):
+                        print(
+                            f"Warning: Empty part in C command on Line {current_line_num}: '{line}'. Skipping."
+                        )
+                        continue
 
                     # Clean potential comments from last part (velocity)
-                    velocity_str = velocity_str_raw.split('#', 1)[0].strip()
+                    velocity_str = velocity_str_raw.split("#", 1)[0].strip()
                     duration_sym = duration_sym_raw
 
                     inst_track_key = (inst_name_for_event_lower, track_id)
@@ -1096,33 +1426,53 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     try:
                         velocity = int(velocity_str)
                         if not 0 <= velocity <= 127:
-                            print(f"Warning: Velocity {velocity} out of range (0-127) on Line {current_line_num}. Clamping.")
+                            print(
+                                f"Warning: Velocity {velocity} out of range (0-127) on Line {current_line_num}. Clamping."
+                            )
                             velocity = max(0, min(127, velocity))
                     except ValueError:
-                        velocity = 70 # Default velocity for chords
-                        print(f"Warning: Invalid velocity '{velocity_str_raw}' on Line {current_line_num}. Using {velocity}.")
+                        velocity = 70  # Default velocity for chords
+                        print(
+                            f"Warning: Invalid velocity '{velocity_str_raw}' on Line {current_line_num}. Using {velocity}."
+                        )
 
                     # Tolerate missing brackets but warn
-                    if pitches_str_raw.startswith("[") and pitches_str_raw.endswith("]"):
+                    if pitches_str_raw.startswith("[") and pitches_str_raw.endswith(
+                        "]"
+                    ):
                         pitches_str = pitches_str_raw[1:-1]
                     else:
-                        print(f"Warning: Chord pitches format incorrect on Line {current_line_num}: '{pitches_str_raw}'. Expected '[P1,P2,...]'. Attempting parse.")
+                        print(
+                            f"Warning: Chord pitches format incorrect on Line {current_line_num}: '{pitches_str_raw}'. Expected '[P1,P2,...]'. Attempting parse."
+                        )
                         pitches_str = pitches_str_raw
 
-                    pitch_names = [p.strip() for p in pitches_str.split(",") if p.strip()]
+                    pitch_names = [
+                        p.strip() for p in pitches_str.split(",") if p.strip()
+                    ]
 
                     if not pitch_names:
-                        print(f"Warning: No valid pitches found in Chord command on Line {current_line_num}: '{line}'. Skipping.")
+                        print(
+                            f"Warning: No valid pitches found in Chord command on Line {current_line_num}: '{line}'. Skipping."
+                        )
                         continue
 
-                    event_duration_sec = duration_to_seconds(duration_sym, current_tempo, current_ts_den)
+                    event_duration_sec = duration_to_seconds(
+                        duration_sym, current_tempo, current_ts_den
+                    )
 
                     # Get current time for this specific track/instrument combination
-                    track_specific_start_offset = time_within_bar_per_track.get(inst_track_key, 0.0)
-                    event_start_time = current_bar_start_time + track_specific_start_offset
+                    track_specific_start_offset = time_within_bar_per_track.get(
+                        inst_track_key, 0.0
+                    )
+                    event_start_time = (
+                        current_bar_start_time + track_specific_start_offset
+                    )
 
                     if is_drum_track_for_event:
-                        print(f"Info: Chord command 'C:' used for drum instrument '{inst_name_for_event_orig}' on Line {current_line_num}. Treating pitches as individual drum sounds.")
+                        print(
+                            f"Info: Chord command 'C:' used for drum instrument '{inst_name_for_event_orig}' on Line {current_line_num}. Treating pitches as individual drum sounds."
+                        )
 
                     # Create multiple note events for the chord
                     chord_notes = []
@@ -1136,16 +1486,22 @@ def parse_symbolic_to_structured_data(symbolic_text):
                                 # Try parsing as standard pitch if not a known drum name
                                 standard_pitch = pitch_to_midi(pitch_name_raw)
                                 if standard_pitch is not None:
-                                    print(f"Warning: Standard pitch notation '{pitch_name_raw}' used in chord on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using MIDI pitch {standard_pitch}.")
+                                    print(
+                                        f"Warning: Standard pitch notation '{pitch_name_raw}' used in chord on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using MIDI pitch {standard_pitch}."
+                                    )
                                     midi_pitch = standard_pitch
                                 else:
-                                    print(f"Warning: Unknown drum sound '{pitch_name_raw}' in chord on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using Kick (36).")
-                                    midi_pitch = 36 # Default to Kick
+                                    print(
+                                        f"Warning: Unknown drum sound '{pitch_name_raw}' in chord on drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Using Kick (36)."
+                                    )
+                                    midi_pitch = 36  # Default to Kick
                         else:
                             midi_pitch = pitch_to_midi(pitch_name_raw)
                             if midi_pitch is None:
-                                print(f"Warning: Could not parse pitch '{pitch_name_raw}' in chord on non-drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Skipping this pitch.")
-                                continue # Skip this specific pitch in the chord
+                                print(
+                                    f"Warning: Could not parse pitch '{pitch_name_raw}' in chord on non-drum track (INST:{inst_name_for_event_orig}) line {current_line_num}. Skipping this pitch."
+                                )
+                                continue  # Skip this specific pitch in the chord
 
                         note_event = {
                             "pitch": midi_pitch,
@@ -1157,38 +1513,52 @@ def parse_symbolic_to_structured_data(symbolic_text):
                         valid_pitches_in_chord += 1
 
                     if valid_pitches_in_chord == 0:
-                        print(f"Warning: Chord command on line {current_line_num} resulted in no valid notes. Skipping chord.")
-                        continue # Skip advancing time if chord was empty
+                        print(
+                            f"Warning: Chord command on line {current_line_num} resulted in no valid notes. Skipping chord."
+                        )
+                        continue  # Skip advancing time if chord was empty
                     # Defer adding notes until instrument defined
 
                 # --- Parse Rest (R) ---
                 elif command == "R":
                     # R:<Track>:<Duration>
-                    data_parts = value.split(":", 1) # Split into Track and Duration
+                    data_parts = value.split(":", 1)  # Split into Track and Duration
                     if len(data_parts) < 2:
-                        print(f"Warning: Malformed R command on Line {current_line_num}: '{line}'. Requires 2 parts. Skipping.")
+                        print(
+                            f"Warning: Malformed R command on Line {current_line_num}: '{line}'. Requires 2 parts. Skipping."
+                        )
                         continue
 
                     track_id = data_parts[0].strip()
                     duration_sym_raw = data_parts[1].strip()
 
                     if not track_id or not duration_sym_raw:
-                         print(f"Warning: Empty part in R command on Line {current_line_num}: '{line}'. Skipping.")
-                         continue
+                        print(
+                            f"Warning: Empty part in R command on Line {current_line_num}: '{line}'. Skipping."
+                        )
+                        continue
 
                     # Clean potential comments from duration part
-                    duration_sym = duration_sym_raw.split('#', 1)[0].strip()
+                    duration_sym = duration_sym_raw.split("#", 1)[0].strip()
 
                     if not duration_sym:
-                         print(f"Warning: Empty duration for R command on Line {current_line_num}: '{line}'. Skipping.")
-                         continue
+                        print(
+                            f"Warning: Empty duration for R command on Line {current_line_num}: '{line}'. Skipping."
+                        )
+                        continue
 
                     inst_track_key = (inst_name_for_event_lower, track_id)
-                    event_duration_sec = duration_to_seconds(duration_sym, current_tempo, current_ts_den)
+                    event_duration_sec = duration_to_seconds(
+                        duration_sym, current_tempo, current_ts_den
+                    )
 
                     # Get current time for this specific track/instrument combination
-                    track_specific_start_offset = time_within_bar_per_track.get(inst_track_key, 0.0)
-                    event_start_time = current_bar_start_time + track_specific_start_offset
+                    track_specific_start_offset = time_within_bar_per_track.get(
+                        inst_track_key, 0.0
+                    )
+                    event_start_time = (
+                        current_bar_start_time + track_specific_start_offset
+                    )
                     # Rests don't generate notes, just advance time
 
                 # --- Post-Event Processing (Common to N, C, R) ---
@@ -1196,50 +1566,67 @@ def parse_symbolic_to_structured_data(symbolic_text):
                     # Define instrument if not seen before
                     if inst_track_key not in instrument_definitions:
                         # Use original case instrument name for the pretty_midi name
-                        pm_instrument_name = f"{inst_name_for_event_orig}-{inst_track_key[1]}"
+                        pm_instrument_name = (
+                            f"{inst_name_for_event_orig}-{inst_track_key[1]}"
+                        )
                         # Lookup program using lowercase name
-                        program = INSTRUMENT_PROGRAM_MAP.get(inst_track_key[0], 0) # Default to Piano if unknown
+                        program = INSTRUMENT_PROGRAM_MAP.get(
+                            inst_track_key[0], 0
+                        )  # Default to Piano if unknown
                         is_drum = inst_track_key[0] in DRUM_INSTRUMENT_NAMES
 
                         # Override program to 0 if it's a drum track, as per GM convention
                         if is_drum:
-                            program = 0 # Program for drums doesn't matter much, channel does
+                            program = 0  # Program for drums doesn't matter much, channel does
 
                         instrument_definitions[inst_track_key] = {
                             "program": program,
                             "is_drum": is_drum,
                             "name": pm_instrument_name,
-                            "orig_inst_name": inst_name_for_event_orig, # Store original name too
+                            "orig_inst_name": inst_name_for_event_orig,  # Store original name too
                         }
-                        print(f"Defined instrument: {pm_instrument_name} (Program: {program}, IsDrum: {is_drum})")
+                        print(
+                            f"Defined instrument: {pm_instrument_name} (Program: {program}, IsDrum: {is_drum})"
+                        )
                         # Initialize time and note list for new instrument/track
                         # Start time should be the global bar start + any offset already accumulated in this bar
-                        initial_track_offset = time_within_bar_per_track.get(inst_track_key, 0.0)
-                        current_track_times[inst_track_key] = current_bar_start_time + initial_track_offset
+                        initial_track_offset = time_within_bar_per_track.get(
+                            inst_track_key, 0.0
+                        )
+                        current_track_times[inst_track_key] = (
+                            current_bar_start_time + initial_track_offset
+                        )
                         time_within_bar_per_track[inst_track_key] = initial_track_offset
                         notes_by_instrument_track[inst_track_key] = []
 
-
                     # Add parsed notes (if any) to the correct list
-                    if command == 'N' and 'note_event' in locals() and note_event is not None:
+                    if (
+                        command == "N"
+                        and "note_event" in locals()
+                        and note_event is not None
+                    ):
                         notes_by_instrument_track[inst_track_key].append(note_event)
                         # Clear note_event to avoid adding duplicates if next line is invalid
                         del note_event
-                    elif command == 'C' and 'chord_notes' in locals() and chord_notes:
+                    elif (
+                        command == "C" and "chord_notes" in locals() and chord_notes
+                    ):
                         notes_by_instrument_track[inst_track_key].extend(chord_notes)
-                         # Clear chord_notes
+                        # Clear chord_notes
                         del chord_notes
-
 
                     # Advance time for this specific track within the current bar context
                     new_track_time_absolute = event_start_time + event_duration_sec
                     current_track_times[inst_track_key] = new_track_time_absolute
-                    time_within_bar_per_track[inst_track_key] = new_track_time_absolute - current_bar_start_time
+                    time_within_bar_per_track[inst_track_key] = (
+                        new_track_time_absolute - current_bar_start_time
+                    )
 
                     # Update the global last event time marker
-                    last_event_end_time = max(last_event_end_time, new_track_time_absolute)
+                    last_event_end_time = max(
+                        last_event_end_time, new_track_time_absolute
+                    )
                     # `current_global_time` is advanced primarily by BAR markers for synchronization.
-
 
             else:
                 print(
@@ -1265,8 +1652,9 @@ def parse_symbolic_to_structured_data(symbolic_text):
             final_instrument_defs[key] = definition
             final_notes_data[key] = notes_by_instrument_track[key]
         else:
-             print(f"Info: Instrument '{definition['name']}' defined but had no notes parsed. Excluding from MIDI.")
-
+            print(
+                f"Info: Instrument '{definition['name']}' defined but had no notes parsed. Excluding from MIDI."
+            )
 
     # Return final state along with parsed data
     return (
@@ -1276,8 +1664,8 @@ def parse_symbolic_to_structured_data(symbolic_text):
         time_signature_changes,
         key_signature_changes,
         last_event_end_time,
-        current_key, # Return the final key state
-        current_tempo, # Return the final tempo state
+        current_key,  # Return the final key state
+        current_tempo,  # Return the final tempo state
     )
 
 
@@ -1299,7 +1687,9 @@ def create_midi_file(
 
     try:
         # Use the first tempo change as the initial tempo
-        initial_tempo = tempo_changes[0][1] if tempo_changes else CONFIG["default_tempo"]
+        initial_tempo = (
+            tempo_changes[0][1] if tempo_changes else CONFIG["default_tempo"]
+        )
         midi_obj = pretty_midi.PrettyMIDI(initial_tempo=initial_tempo)
         print(f"Initialized MIDI with tempo: {initial_tempo:.2f} BPM")
 
@@ -1308,114 +1698,124 @@ def create_midi_file(
 
         # Tempo Changes (pretty_midi handles initial tempo via constructor)
         if len(tempo_changes) > 0:
-             print("Applying tempo changes...")
-             # Filter out redundant changes at the same time, keeping the last one
-             unique_tempo_times = {}
-             for t, bpm in tempo_changes:
-                 unique_tempo_times[round(t, 6)] = bpm # Round time slightly for comparison
+            print("Applying tempo changes...")
+            # Filter out redundant changes at the same time, keeping the last one
+            unique_tempo_times = {}
+            for t, bpm in tempo_changes:
+                unique_tempo_times[round(t, 6)] = bpm  # Round time slightly for comparison
 
-             # Sort by time
-             sorted_tempo_times = sorted(unique_tempo_times.keys())
+            # Sort by time
+            sorted_tempo_times = sorted(unique_tempo_times.keys())
 
-             # Get times and corresponding BPMs, skipping time 0.0 if initial tempo matches
-             final_tempo_times = []
-             final_tempo_bpm = []
-             initial_tempo_set_by_event = False
-             if 0.0 in unique_tempo_times:
-                 if abs(unique_tempo_times[0.0] - initial_tempo) < 1e-3:
-                     initial_tempo_set_by_event = True
-                 else:
-                     # If tempo at 0.0 differs from constructor, warn and override?
-                     # pretty_midi seems to handle this; the constructor sets the first tempo.
-                     # Let's trust pretty_midi's internal handling.
-                     pass
+            # Get times and corresponding BPMs, skipping time 0.0 if initial tempo matches
+            final_tempo_times = []
+            final_tempo_bpm = []
+            initial_tempo_set_by_event = False
+            if 0.0 in unique_tempo_times:
+                if abs(unique_tempo_times[0.0] - initial_tempo) < 1e-3:
+                    initial_tempo_set_by_event = True
+                else:
+                    # If tempo at 0.0 differs from constructor, warn and override?
+                    # pretty_midi seems to handle this; the constructor sets the first tempo.
+                    # Let's trust pretty_midi's internal handling.
+                    pass
 
+            for t in sorted_tempo_times:
+                # Skip adding tempo at time 0 if it was already set by constructor
+                if t == 0.0 and initial_tempo_set_by_event:
+                    continue
+                if t >= 0:  # Ensure non-negative time
+                    final_tempo_times.append(t)
+                    final_tempo_bpm.append(unique_tempo_times[t])
 
-             for t in sorted_tempo_times:
-                  # Skip adding tempo at time 0 if it was already set by constructor
-                  if t == 0.0 and initial_tempo_set_by_event:
-                      continue
-                  if t >= 0: # Ensure non-negative time
-                     final_tempo_times.append(t)
-                     final_tempo_bpm.append(unique_tempo_times[t])
-
-
-             if final_tempo_times:
-                 # pretty_midi expects tempo in microseconds per quarter note (MPQN)
-                 tempo_change_mpq = [pretty_midi.bpm_to_tempo(bpm) for bpm in final_tempo_bpm]
-                 # Use the internal method to add tempo changes after initialization
-                 midi_obj._load_tempo_changes(final_tempo_times, tempo_change_mpq)
-                 print(f"Applied {len(final_tempo_times)} tempo change events (excluding initial).")
-             else:
-                 print("No additional tempo changes applied.")
-
+            if final_tempo_times:
+                # pretty_midi expects tempo in microseconds per quarter note (MPQN)
+                tempo_change_mpq = [
+                    pretty_midi.bpm_to_tempo(bpm) for bpm in final_tempo_bpm
+                ]
+                # Use the internal method to add tempo changes after initialization
+                midi_obj._load_tempo_changes(final_tempo_times, tempo_change_mpq)
+                print(
+                    f"Applied {len(final_tempo_times)} tempo change events (excluding initial)."
+                )
+            else:
+                print("No additional tempo changes applied.")
 
         # Time Signature Changes
-        time_sig_changes.sort(key=lambda x: x[0]) # Sort by time
+        time_sig_changes.sort(key=lambda x: x[0])  # Sort by time
         unique_ts = {}
         # Keep the *last* definition at each specific time
         for time, num, den in time_sig_changes:
             # Denominator must be power of 2 (or 1) for standard MIDI
             actual_den = den
             if den <= 0 or (den & (den - 1) != 0 and den != 1):
-                 # Find closest power of 2
-                 if den <= 0: actual_den = 4
-                 else: actual_den = 2**math.ceil(math.log2(den))
-                 print(f"Warning: Invalid time signature denominator {den} at time {time:.3f}s. Using closest power of 2: {actual_den}.")
+                # Find closest power of 2
+                if den <= 0:
+                    actual_den = 4
+                else:
+                    actual_den = 2 ** math.ceil(math.log2(den))
+                print(
+                    f"Warning: Invalid time signature denominator {den} at time {time:.3f}s. Using closest power of 2: {actual_den}."
+                )
 
             # Use rounded time as key to merge close events
             unique_ts[round(time, 6)] = (num, actual_den)
 
-        midi_obj.time_signature_changes = [] # Clear default if any
+        midi_obj.time_signature_changes = []  # Clear default if any
         applied_ts_count = 0
         last_ts = None
         # Add sorted, unique time signatures
         for time in sorted(unique_ts.keys()):
-             if time >= 0:
-                 num, den = unique_ts[time]
-                 # Avoid adding duplicate consecutive time signatures
-                 if last_ts != (num, den):
-                     ts_change = pretty_midi.TimeSignature(num, den, time)
-                     midi_obj.time_signature_changes.append(ts_change)
-                     applied_ts_count += 1
-                     last_ts = (num, den)
+            if time >= 0:
+                num, den = unique_ts[time]
+                # Avoid adding duplicate consecutive time signatures
+                if last_ts != (num, den):
+                    ts_change = pretty_midi.TimeSignature(num, den, time)
+                    midi_obj.time_signature_changes.append(ts_change)
+                    applied_ts_count += 1
+                    last_ts = (num, den)
 
         if applied_ts_count > 0:
             print(f"Applied {applied_ts_count} unique time signature changes.")
         # Ensure at least one time signature exists (usually at time 0)
         if not midi_obj.time_signature_changes:
             default_num, default_den = CONFIG["default_timesig"]
-            midi_obj.time_signature_changes.append(pretty_midi.TimeSignature(default_num, default_den, 0.0))
+            midi_obj.time_signature_changes.append(
+                pretty_midi.TimeSignature(default_num, default_den, 0.0)
+            )
             print(f"Applied default time signature: {default_num}/{default_den}")
 
-
         # Key Signature Changes
-        key_sig_changes.sort(key=lambda x: x[0]) # Sort by time
+        key_sig_changes.sort(key=lambda x: x[0])  # Sort by time
         unique_ks = {}
         last_valid_key_name = CONFIG["default_key"]
         # Keep the *last* definition at each specific time
         for time, key_name in key_sig_changes:
-             # Use rounded time as key
-             unique_ks[round(time, 6)] = key_name
+            # Use rounded time as key
+            unique_ks[round(time, 6)] = key_name
 
-        midi_obj.key_signature_changes = [] # Clear default if any
+        midi_obj.key_signature_changes = []  # Clear default if any
         applied_key_count = 0
         last_key_number = None
         # Add sorted, unique key signatures
         for time in sorted(unique_ks.keys()):
-             if time >= 0:
+            if time >= 0:
                 key_name = unique_ks[time]
                 try:
                     key_number = pretty_midi.key_name_to_key_number(key_name)
                     # Avoid adding duplicate consecutive key signatures
                     if key_number != last_key_number:
-                        key_change = pretty_midi.KeySignature(key_number=key_number, time=time)
+                        key_change = pretty_midi.KeySignature(
+                            key_number=key_number, time=time
+                        )
                         midi_obj.key_signature_changes.append(key_change)
                         applied_key_count += 1
                         last_key_number = key_number
-                        last_valid_key_name = key_name # Track last successfully applied name
+                        last_valid_key_name = key_name  # Track last successfully applied name
                 except ValueError as e:
-                    print(f"Warning: Could not parse key signature '{key_name}' at time {time:.3f}s. Skipping. Error: {e}")
+                    print(
+                        f"Warning: Could not parse key signature '{key_name}' at time {time:.3f}s. Skipping. Error: {e}"
+                    )
 
         if applied_key_count > 0:
             print(f"Applied {applied_key_count} unique key signature changes.")
@@ -1423,34 +1823,47 @@ def create_midi_file(
         if not midi_obj.key_signature_changes:
             try:
                 # Use the last valid key name seen during parsing, or the config default
-                final_default_key = last_valid_key_name if last_key_number is not None else CONFIG["default_key"]
-                default_key_num = pretty_midi.key_name_to_key_number(final_default_key)
-                midi_obj.key_signature_changes.append(pretty_midi.KeySignature(key_number=default_key_num, time=0.0))
+                final_default_key = (
+                    last_valid_key_name
+                    if last_key_number is not None
+                    else CONFIG["default_key"]
+                )
+                default_key_num = pretty_midi.key_name_to_key_number(
+                    final_default_key
+                )
+                midi_obj.key_signature_changes.append(
+                    pretty_midi.KeySignature(key_number=default_key_num, time=0.0)
+                )
                 print(f"Applied default key signature: {final_default_key}")
             except ValueError as e:
-                print(f"Warning: Could not parse default key signature '{final_default_key}'. No key signature applied. Error: {e}")
-
+                print(
+                    f"Warning: Could not parse default key signature '{final_default_key}'. No key signature applied. Error: {e}"
+                )
 
         # --- Create instruments and add notes ---
         available_channels = list(range(16))
-        drum_channel = 9 # Standard GM drum channel
+        drum_channel = 9  # Standard GM drum channel
         if drum_channel in available_channels:
-            available_channels.remove(drum_channel) # Reserve channel 9 for drums
-        channel_index = 0 # Index into available_channels for non-drum tracks
+            available_channels.remove(drum_channel)  # Reserve channel 9 for drums
+        channel_index = 0  # Index into available_channels for non-drum tracks
 
         # Sort definitions to ensure consistent channel assignment if possible
         # Key: (inst_name_lower, track_id)
         sorted_inst_keys = sorted(instrument_defs.keys())
 
-        assigned_channels = {} # Track assigned channel for each instrument object
+        assigned_channels = {}  # Track assigned channel for each instrument object
 
         for inst_track_key in sorted_inst_keys:
             definition = instrument_defs[inst_track_key]
             # inst_track_key is (inst_name_lower, track_id)
             # definition is {program, is_drum, name, orig_inst_name}
 
-            if not notes_data.get(inst_track_key): # Should have been filtered by parser, but double check
-                print(f"Skipping instrument '{definition['name']}' as it has no parsed notes.")
+            if not notes_data.get(
+                inst_track_key
+            ):  # Should have been filtered by parser, but double check
+                print(
+                    f"Skipping instrument '{definition['name']}' as it has no parsed notes."
+                )
                 continue
 
             is_drum = definition["is_drum"]
@@ -1463,13 +1876,17 @@ def create_midi_file(
                 channel = drum_channel
             else:
                 if not available_channels:
-                    print(f"ERROR: No available non-drum MIDI channels left for instrument '{pm_instrument_name}'. Skipping.")
-                    continue # Skip this instrument if no channels left
+                    print(
+                        f"ERROR: No available non-drum MIDI channels left for instrument '{pm_instrument_name}'. Skipping."
+                    )
+                    continue  # Skip this instrument if no channels left
 
                 # Cycle through available channels if we run out
                 channel = available_channels[channel_index % len(available_channels)]
                 if channel_index >= len(available_channels):
-                     print(f"Warning: Ran out of unique non-drum MIDI channels! Reusing channel {channel} for {pm_instrument_name}.")
+                    print(
+                        f"Warning: Ran out of unique non-drum MIDI channels! Reusing channel {channel} for {pm_instrument_name}."
+                    )
                 channel_index += 1
 
             # Create the instrument object
@@ -1482,9 +1899,9 @@ def create_midi_file(
             # Store the assigned channel (pretty_midi doesn't expose it easily after adding)
             assigned_channels[id(instrument_obj)] = channel
 
-
-            print(f"Created MIDI instrument: {pm_instrument_name} (Program: {program}, IsDrum: {is_drum}, Target Channel: {channel})")
-
+            print(
+                f"Created MIDI instrument: {pm_instrument_name} (Program: {program}, IsDrum: {is_drum}, Target Channel: {channel})"
+            )
 
             # Add notes to the instrument object
             note_count = 0
@@ -1492,7 +1909,7 @@ def create_midi_file(
             for note_info in notes_data[inst_track_key]:
                 start_time = max(0.0, note_info["start"])
                 # Ensure minimum duration to avoid zero-length notes in MIDI
-                min_duration = 0.001 # 1 millisecond seems safe
+                min_duration = 0.001  # 1 millisecond seems safe
                 end_time = max(start_time + min_duration, note_info["end"])
 
                 # Clamp velocity to valid MIDI range (1-127 for NoteOn, 0 is NoteOff)
@@ -1501,8 +1918,12 @@ def create_midi_file(
                 pitch = max(0, min(127, int(note_info["pitch"])))
 
                 # Additional check for duration validity
-                if end_time - start_time < min_duration / 2: # Check if duration is effectively zero
-                    print(f"Warning: Skipping note for '{pm_instrument_name}' with near-zero duration (Start: {start_time:.4f}, End: {end_time:.4f}, Pitch: {pitch}).")
+                if (
+                    end_time - start_time < min_duration / 2
+                ):  # Check if duration is effectively zero
+                    print(
+                        f"Warning: Skipping note for '{pm_instrument_name}' with near-zero duration (Start: {start_time:.4f}, End: {end_time:.4f}, Pitch: {pitch})."
+                    )
                     skipped_notes += 1
                     continue
 
@@ -1514,14 +1935,20 @@ def create_midi_file(
                     note_count += 1
                 except ValueError as e:
                     # This might catch issues if times are invalid (e.g., negative)
-                    print(f"Error creating pretty_midi.Note for {pm_instrument_name}: {e}. Skipping note.")
-                    print(f"  Note data: Pitch={pitch}, Vel={velocity}, Start={start_time:.4f}, End={end_time:.4f}")
+                    print(
+                        f"Error creating pretty_midi.Note for {pm_instrument_name}: {e}. Skipping note."
+                    )
+                    print(
+                        f"  Note data: Pitch={pitch}, Vel={velocity}, Start={start_time:.4f}, End={end_time:.4f}"
+                    )
                     skipped_notes += 1
 
             if note_count == 0 and skipped_notes == 0:
-                 print(f"  Warning: Instrument '{pm_instrument_name}' had no notes added.")
+                print(f"  Warning: Instrument '{pm_instrument_name}' had no notes added.")
             else:
-                 print(f"  Added {note_count} notes. ({skipped_notes} notes skipped due to errors/duration).")
+                print(
+                    f"  Added {note_count} notes. ({skipped_notes} notes skipped due to errors/duration)."
+                )
 
         # Ensure output directory exists
         os.makedirs(CONFIG["output_dir"], exist_ok=True)
@@ -1560,46 +1987,51 @@ if __name__ == "__main__":
     current_bar_count = 1
     last_section_summary_info = None
     generated_sections_count = 0
-    total_planned_bars = sum(info.get('bars', 0) for info in section_plan.values())
+    total_planned_bars = sum(info.get("bars", 0) for info in section_plan.values())
 
-    print(f"\n--- Step 3: Generating {len(section_plan)} Sections ({total_planned_bars} planned bars) ---")
-    section_order = list(section_plan.keys()) # Get the order
+    print(
+        f"\n--- Step 3: Generating {len(section_plan)} Sections ({total_planned_bars} planned bars) ---"
+    )
+    section_order = list(section_plan.keys())  # Get the order
     for section_name in section_order:
         section_info = section_plan[section_name]
         # Basic validation of section_info before passing
         if not isinstance(section_info.get("bars"), int) or section_info["bars"] <= 0:
-             print(f"ERROR: Invalid 'bars' value ({section_info.get('bars')}) for section {section_name}. Skipping.")
-             continue # Skip this section
-
-        symbolic_section, current_section_summary_info = (
-            generate_symbolic_section(
-                enriched_description,
-                section_plan, # Pass the whole plan for context
-                section_name,
-                current_bar_count,
-                last_section_summary_info,
+            print(
+                f"ERROR: Invalid 'bars' value ({section_info.get('bars')}) for section {section_name}. Skipping."
             )
+            continue  # Skip this section
+
+        symbolic_section, current_section_summary_info = generate_symbolic_section(
+            enriched_description,
+            section_plan,  # Pass the whole plan for context
+            section_name,
+            current_bar_count,
+            last_section_summary_info,
         )
 
         if symbolic_section is not None and current_section_summary_info is not None:
-             # Add newline if missing for cleaner concatenation between sections
+            # Add newline if missing for cleaner concatenation between sections
             symbolic_section_cleaned = symbolic_section.strip()
-            if symbolic_section_cleaned: # Avoid adding empty sections
+            if symbolic_section_cleaned:  # Avoid adding empty sections
                 all_symbolic_text += symbolic_section_cleaned + "\n"
                 generated_sections_count += 1
                 last_section_summary_info = current_section_summary_info
-                current_bar_count += section_info["bars"] # Advance bar counter
+                current_bar_count += section_info["bars"]  # Advance bar counter
             else:
-                 print(f"Warning: Section {section_name} generated empty symbolic text. Skipping concatenation.")
-                 # Don't advance bar counter if section was empty/invalid
+                print(
+                    f"Warning: Section {section_name} generated empty symbolic text. Skipping concatenation."
+                )
+                # Don't advance bar counter if section was empty/invalid
 
         else:
-            print(f"Failed to generate or validate section {section_name}. Stopping generation.")
+            print(
+                f"Failed to generate or validate section {section_name}. Stopping generation."
+            )
             # Option: decide whether to proceed with partial generation or stop
             # break # Stop the whole process if a section fails critically
             print("Attempting to proceed with previously generated sections...")
-            break # For now, stop on critical failure
-
+            break  # For now, stop on critical failure
 
     if not all_symbolic_text.strip():
         print("\nERROR: No symbolic text was generated successfully. Cannot proceed.")
@@ -1625,7 +2057,7 @@ if __name__ == "__main__":
     print("------------------------------------")
 
     # Step 4: Parse the combined symbolic text
-    _pitch_parse_cache.clear() # Clear cache before parsing
+    _pitch_parse_cache.clear()  # Clear cache before parsing
     (
         parsed_notes,
         instrument_definitions,
