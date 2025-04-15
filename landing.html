@@ -4,6 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>MidiMaker Generator - AI-Powered Music Creation</title>
+        <script type="text/javascript" src="//www.midijs.net/lib/midi.js"></script>
         <style>
             :root {
                 --bg-color: #121212;
@@ -414,6 +415,26 @@
                 text-align: center;
             }
 
+            .midi-player-controls {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 10px;
+            }
+
+            .midi-player-controls a {
+                color: var(--text-color);
+                text-decoration: none;
+                padding: 8px 15px;
+                border-radius: 5px;
+                background-color: var(--primary-color);
+                transition: background-color 0.3s ease;
+            }
+
+            .midi-player-controls a:hover {
+                background-color: #1ed760;
+            }
+
             /* Responsive Design */
             @media (max-width: 768px) {
                 .hero h2 {
@@ -645,26 +666,32 @@
 
                 <div class="midi-player-card">
                     <h4>Example 1: Energetic Electronic Piece</h4>
-                    <audio controls>
-                        <source src="output/generated_music_20250413_202715.mid" type="audio/midi" />
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="midi-player-controls">
+                        <a href="#" onclick="MIDIjs.play('output/generated_music_20250413_202715.mid'); return false;"
+                            >Play</a
+                        >
+                        <a href="#" onclick="MIDIjs.stop(); return false;">Stop</a>
+                    </div>
                 </div>
 
                 <div class="midi-player-card">
                     <h4>Example 2: Melancholic Piano Ballad</h4>
-                    <audio controls>
-                        <source src="output/generated_music_20250413_211906.mid" type="audio/midi" />
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="midi-player-controls">
+                        <a href="#" onclick="MIDIjs.play('output/generated_music_20250413_211906.mid'); return false;"
+                            >Play</a
+                        >
+                        <a href="#" onclick="MIDIjs.stop(); return false;">Stop</a>
+                    </div>
                 </div>
 
                 <div class="midi-player-card">
                     <h4>Example 3: Upbeat Jazzy Track</h4>
-                    <audio controls>
-                        <source src="output/generated_music_20250413_131856.mid" type="audio/midi" />
-                        Your browser does not support the audio element.
-                    </audio>
+                    <div class="midi-player-controls">
+                        <a href="#" onclick="MIDIjs.play('output/generated_music_20250413_131856.mid'); return false;"
+                            >Play</a
+                        >
+                        <a href="#" onclick="MIDIjs.stop(); return false;">Stop</a>
+                    </div>
                 </div>
             </div>
         </section>
