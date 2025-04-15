@@ -1,554 +1,620 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MidiMaker Generator - AI-Powered Music Creation</title>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --primary-color: #1DB954; /* Spotify Green-ish */
-            --secondary-color: #282828;
-            --text-color: #ffffff;
-            --text-muted-color: #b3b3b3;
-            --card-bg: #1e1e1e;
-            --border-color: #333333;
-            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: var(--font-family);
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        header {
-            background-color: var(--secondary-color);
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        header h1 {
-            font-size: 1.8rem;
-            color: var(--primary-color);
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-        }
-
-        nav ul li {
-            margin-left: 20px;
-        }
-
-        nav ul li a {
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: bold;
-            transition: color 0.3s ease;
-        }
-
-        nav ul li a:hover {
-            color: var(--primary-color);
-        }
-
-        .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('image.jpg') no-repeat center center/cover;
-            /* Fallback background if image doesn't load */
-            background-color: var(--secondary-color);
-            color: var(--text-color);
-            padding: 100px 0;
-            text-align: center;
-            min-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hero h2 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            line-height: 1.2;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            max-width: 600px;
-            color: var(--text-muted-color);
-        }
-
-        .cta-button {
-            display: inline-block;
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            text-decoration: none;
-            border-radius: 50px;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-
-        .cta-button:hover {
-            background-color: #1ed760; /* Lighter green */
-            transform: scale(1.05);
-        }
-
-        section {
-            padding: 60px 0;
-        }
-
-        section h3 {
-            text-align: center;
-            font-size: 2rem;
-            margin-bottom: 40px;
-            color: var(--primary-color);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-        }
-
-        .feature-card {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .feature-card .icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            /* Placeholder for actual icons */
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            line-height: 50px;
-            border: 2px solid var(--primary-color);
-            border-radius: 50%;
-        }
-
-        .feature-card h4 {
-            font-size: 1.3rem;
-            margin-bottom: 10px;
-            color: var(--text-color);
-        }
-
-        .feature-card p {
-            font-size: 0.95rem;
-            color: var(--text-muted-color);
-        }
-
-        .pipeline-steps {
-            list-style: none;
-            counter-reset: pipeline-counter;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .pipeline-step {
-            background-color: var(--card-bg);
-            padding: 20px 25px 20px 60px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            position: relative;
-            border-left: 4px solid var(--primary-color);
-            transition: background-color 0.3s ease;
-        }
-
-        .pipeline-step:hover {
-             background-color: var(--secondary-color);
-        }
-
-        .pipeline-step::before {
-            content: counter(pipeline-counter);
-            counter-increment: pipeline-counter;
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        .pipeline-step strong {
-            color: var(--primary-color);
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .pipeline-step p {
-            color: var(--text-muted-color);
-            font-size: 0.95rem;
-        }
-
-        .symbolic-format-section {
-            background-color: var(--secondary-color);
-        }
-
-        .symbolic-format-section .container {
-             display: flex;
-             flex-direction: column;
-             align-items: center;
-        }
-
-        .symbolic-format-section p {
-             max-width: 700px;
-             text-align: center;
-             margin-bottom: 20px;
-             color: var(--text-muted-color);
-        }
-
-        .code-example {
-            background-color: #000;
-            color: #f0f0f0;
-            padding: 20px;
-            border-radius: 5px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            white-space: pre;
-            max-width: 100%;
-            border: 1px solid var(--border-color);
-        }
-
-        .code-example .comment {
-            color: #6a9955; /* Greenish comment color */
-        }
-
-        .code-example .keyword {
-            color: #569cd6; /* Bluish keyword color */
-        }
-
-        .code-example .value {
-            color: #ce9178; /* Orangish value color */
-        }
-
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            align-items: stretch; /* Make cards same height */
-        }
-
-        .pricing-card {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .pricing-card:hover {
-             transform: translateY(-5px);
-             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .pricing-card.popular {
-            border: 2px solid var(--primary-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-         .pricing-card.popular::before {
-            content: 'Most Popular';
-            position: absolute;
-            top: 15px;
-            right: -35px;
-            background-color: var(--primary-color);
-            color: var(--text-color);
-            padding: 5px 30px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            transform: rotate(45deg);
-            text-align: center;
-        }
-
-        .pricing-card h4 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-
-        .price {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .price span {
-            font-size: 1rem;
-            font-weight: normal;
-            color: var(--text-muted-color);
-        }
-
-        .pricing-card ul {
-            list-style: none;
-            margin: 20px 0;
-            text-align: left;
-            color: var(--text-muted-color);
-            flex-grow: 1; /* Pushes button down */
-        }
-
-        .pricing-card ul li {
-            margin-bottom: 10px;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .pricing-card ul li::before {
-            content: '✓';
-            color: var(--primary-color);
-            position: absolute;
-            left: 0;
-            font-weight: bold;
-        }
-
-        .pricing-card .cta-button {
-            margin-top: auto; /* Pushes button to bottom */
-        }
-
-        .considerations-list {
-            list-style: none;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        .considerations-list li {
-            background-color: var(--card-bg);
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            border-left: 3px solid var(--primary-color);
-        }
-
-        .considerations-list strong {
-             color: var(--text-color);
-        }
-
-        .future-enhancements-section {
-             background-color: var(--secondary-color);
-        }
-
-        .future-enhancements-list {
-             list-style: disc;
-             max-width: 800px;
-             margin: 0 auto;
-             padding-left: 20px;
-             color: var(--text-muted-color);
-        }
-         .future-enhancements-list li {
-             margin-bottom: 10px;
-         }
-
-        footer {
-            background-color: var(--secondary-color);
-            color: var(--text-muted-color);
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 60px;
-            border-top: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero h2 {
-                font-size: 2.5rem;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MidiMaker Generator - AI-Powered Music Creation</title>
+        <style>
+            :root {
+                --bg-color: #121212;
+                --primary-color: #1db954; /* Spotify Green-ish */
+                --secondary-color: #282828;
+                --text-color: #ffffff;
+                --text-muted-color: #b3b3b3;
+                --card-bg: #1e1e1e;
+                --border-color: #333333;
+                --font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
             }
-            .hero p {
-                font-size: 1rem;
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
+
+            body {
+                font-family: var(--font-family);
+                background-color: var(--bg-color);
+                color: var(--text-color);
+                line-height: 1.6;
+            }
+
+            .container {
+                max-width: 1100px;
+                margin: 0 auto;
+                padding: 0 20px;
+            }
+
+            header {
+                background-color: var(--secondary-color);
+                padding: 1rem 0;
+                border-bottom: 1px solid var(--border-color);
+            }
+
             header .container {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+                color: var(--primary-color);
+            }
+
+            nav ul {
+                list-style: none;
+                display: flex;
+            }
+
+            nav ul li {
+                margin-left: 20px;
+            }
+
+            nav ul li a {
+                color: var(--text-color);
+                text-decoration: none;
+                font-weight: bold;
+                transition: color 0.3s ease;
+            }
+
+            nav ul li a:hover {
+                color: var(--primary-color);
+            }
+
+            .hero {
+                background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                    url("image.jpg") no-repeat center center/cover;
+                /* Fallback background if image doesn't load */
+                background-color: var(--secondary-color);
+                color: var(--text-color);
+                padding: 100px 0;
+                text-align: center;
+                min-height: 70vh;
+                display: flex;
                 flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .hero h2 {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+                line-height: 1.2;
+            }
+
+            .hero p {
+                font-size: 1.2rem;
+                margin-bottom: 2rem;
+                max-width: 600px;
+                color: var(--text-muted-color);
+            }
+
+            .cta-button {
+                display: inline-block;
+                background-color: var(--primary-color);
+                color: var(--text-color);
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                font-weight: bold;
+                text-decoration: none;
+                border-radius: 50px;
+                transition: background-color 0.3s ease, transform 0.2s ease;
+            }
+
+            .cta-button:hover {
+                background-color: #1ed760; /* Lighter green */
+                transform: scale(1.05);
+            }
+
+            section {
+                padding: 60px 0;
+            }
+
+            section h3 {
+                text-align: center;
+                font-size: 2rem;
+                margin-bottom: 40px;
+                color: var(--primary-color);
+            }
+
+            .features-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 30px;
+            }
+
+            .feature-card {
+                background-color: var(--card-bg);
+                padding: 30px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                text-align: center;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .feature-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .feature-card .icon {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+                color: var(--primary-color);
+                /* Placeholder for actual icons */
+                display: inline-block;
+                width: 50px;
+                height: 50px;
+                line-height: 50px;
+                border: 2px solid var(--primary-color);
+                border-radius: 50%;
+            }
+
+            .feature-card h4 {
+                font-size: 1.3rem;
+                margin-bottom: 10px;
+                color: var(--text-color);
+            }
+
+            .feature-card p {
+                font-size: 0.95rem;
+                color: var(--text-muted-color);
+            }
+
+            .pipeline-steps {
+                list-style: none;
+                counter-reset: pipeline-counter;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .pipeline-step {
+                background-color: var(--card-bg);
+                padding: 20px 25px 20px 60px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                position: relative;
+                border-left: 4px solid var(--primary-color);
+                transition: background-color 0.3s ease;
+            }
+
+            .pipeline-step:hover {
+                background-color: var(--secondary-color);
+            }
+
+            .pipeline-step::before {
+                content: counter(pipeline-counter);
+                counter-increment: pipeline-counter;
+                position: absolute;
+                left: 15px;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: var(--primary-color);
+                color: var(--text-color);
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-weight: bold;
+                font-size: 0.9rem;
+            }
+
+            .pipeline-step strong {
+                color: var(--primary-color);
+                display: block;
+                margin-bottom: 5px;
+            }
+
+            .pipeline-step p {
+                color: var(--text-muted-color);
+                font-size: 0.95rem;
+            }
+
+            .symbolic-format-section {
+                background-color: var(--secondary-color);
+            }
+
+            .symbolic-format-section .container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .symbolic-format-section p {
+                max-width: 700px;
+                text-align: center;
+                margin-bottom: 20px;
+                color: var(--text-muted-color);
+            }
+
+            .code-example {
+                background-color: #000;
+                color: #f0f0f0;
+                padding: 20px;
+                border-radius: 5px;
+                font-family: "Courier New", Courier, monospace;
+                font-size: 0.9rem;
+                overflow-x: auto;
+                white-space: pre;
+                max-width: 100%;
+                border: 1px solid var(--border-color);
+            }
+
+            .code-example .comment {
+                color: #6a9955; /* Greenish comment color */
+            }
+
+            .code-example .keyword {
+                color: #569cd6; /* Bluish keyword color */
+            }
+
+            .code-example .value {
+                color: #ce9178; /* Orangish value color */
+            }
+
+            .pricing-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 30px;
+                align-items: stretch; /* Make cards same height */
+            }
+
+            .pricing-card {
+                background-color: var(--card-bg);
+                padding: 30px;
+                border-radius: 8px;
+                border: 1px solid var(--border-color);
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .pricing-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            }
+
+            .pricing-card.popular {
+                border: 2px solid var(--primary-color);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .pricing-card.popular::before {
+                content: "Most Popular";
+                position: absolute;
+                top: 15px;
+                right: -35px;
+                background-color: var(--primary-color);
+                color: var(--text-color);
+                padding: 5px 30px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                transform: rotate(45deg);
                 text-align: center;
             }
-            nav ul {
-                margin-top: 10px;
-                justify-content: center;
+
+            .pricing-card h4 {
+                font-size: 1.5rem;
+                margin-bottom: 10px;
+                color: var(--primary-color);
             }
-            nav ul li {
-                margin: 0 10px;
+
+            .price {
+                font-size: 2.5rem;
+                font-weight: bold;
+                margin-bottom: 10px;
             }
-             .pipeline-step {
-                 padding: 20px 20px 20px 50px;
-             }
-             .pipeline-step::before {
-                 left: 10px;
-                 width: 25px;
-                 height: 25px;
-                 font-size: 0.8rem;
-             }
-             .pricing-card.popular::before {
-                 font-size: 0.7rem;
-                 top: 10px;
-                 right: -40px;
-             }
-        }
 
-        @media (max-width: 480px) {
-            .hero h2 {
-                font-size: 2rem;
+            .price span {
+                font-size: 1rem;
+                font-weight: normal;
+                color: var(--text-muted-color);
             }
-             .cta-button {
-                 padding: 12px 25px;
-                 font-size: 1rem;
-             }
-             section h3 {
-                 font-size: 1.8rem;
-             }
-             .feature-card {
-                 padding: 20px;
-             }
-             .pricing-card {
-                 padding: 20px;
-             }
-             .price {
-                 font-size: 2rem;
-             }
-        }
-    </style>
-</head>
-<body>
 
-    <header>
-        <div class="container">
-            <h1>MidiMaker</h1>
-            <nav>
-                <ul>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="#pricing">Pricing</a></li>
-                </ul>
-            </nav>
-        </div>
-    </header>
+            .pricing-card ul {
+                list-style: none;
+                margin: 20px 0;
+                text-align: left;
+                color: var(--text-muted-color);
+                flex-grow: 1; /* Pushes button down */
+            }
 
-    <section class="hero">
-        <div class="container">
-            <h2>Compose Unique MIDI Music with AI</h2>
-            <p>Leverage Large Language Models to turn your textual descriptions into coherent, structured musical pieces. Generate section by section for enhanced control and creativity.</p>
-            <a href="#pricing" class="cta-button">Get Started Now</a>
-            <!-- Note: The image 'image.jpg' from the README should be placed in the same directory or path updated -->
-            <img src="image.jpg" alt="Abstract Music Visualization" style="max-width: 80%; height: auto; margin-top: 40px; border-radius: 8px; opacity: 0.8; display: none; /* Hide if image not available */ ">
-        </div>
-    </section>
+            .pricing-card ul li {
+                margin-bottom: 10px;
+                padding-left: 25px;
+                position: relative;
+            }
 
-    <section id="features" class="features-section">
-        <div class="container">
-            <h3>Core Features</h3>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="icon">♫</div>
-                    <h4>Text-to-MIDI Generation</h4>
-                    <p>Transform high-level musical ideas (e.g., "sad piano in C minor") into playable MIDI files using advanced AI.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="icon">§</div>
-                    <h4>Sectional Generation</h4>
-                    <p>Break down music creation into manageable sections (A, B, C...) for improved coherence and structure in longer pieces.</p>
-                </div>
-                <div class="feature-card">
-                     <div class="icon">#</div>
-                    <h4>Compact Symbolic Format</h4>
-                    <p>Utilizes a concise, text-based music notation optimized for LLM processing and easy parsing into MIDI.</p>
-                </div>
-                 <div class="feature-card">
-                     <div class="icon">⚙️</div>
-                    <h4>Algorithmic Conversion</h4>
-                    <p>A robust Python script (`music.py`) intelligently parses the symbolic format and generates the final MIDI output.</p>
-                </div>
-                 <div class="feature-card">
-                     <div class="icon">🧠</div>
-                    <h4>LLM-Powered Enrichment</h4>
-                    <p>Let the AI elaborate on your simple ideas, suggesting structure, instrumentation, tempo, and key signatures.</p>
-                </div>
-                 <div class="feature-card">
-                     <div class="icon">↔️</div>
-                    <h4>Coherent Transitions</h4>
-                    <p>Guided prompts help ensure smooth musical development and logical transitions between generated sections.</p>
+            .pricing-card ul li::before {
+                content: "✓";
+                color: var(--primary-color);
+                position: absolute;
+                left: 0;
+                font-weight: bold;
+            }
+
+            .pricing-card .cta-button {
+                margin-top: auto; /* Pushes button to bottom */
+            }
+
+            .considerations-list {
+                list-style: none;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+
+            .considerations-list li {
+                background-color: var(--card-bg);
+                padding: 15px 20px;
+                margin-bottom: 10px;
+                border-radius: 5px;
+                border-left: 3px solid var(--primary-color);
+            }
+
+            .considerations-list strong {
+                color: var(--text-color);
+            }
+
+            .future-enhancements-section {
+                background-color: var(--secondary-color);
+            }
+
+            .future-enhancements-list {
+                list-style: disc;
+                max-width: 800px;
+                margin: 0 auto;
+                padding-left: 20px;
+                color: var(--text-muted-color);
+            }
+            .future-enhancements-list li {
+                margin-bottom: 10px;
+            }
+
+            footer {
+                background-color: var(--secondary-color);
+                color: var(--text-muted-color);
+                text-align: center;
+                padding: 20px 0;
+                margin-top: 60px;
+                border-top: 1px solid var(--border-color);
+                font-size: 0.9rem;
+            }
+
+            .midi-examples-section {
+                background-color: var(--card-bg);
+            }
+
+            .midi-player-card {
+                background-color: var(--secondary-color);
+                padding: 20px;
+                border-radius: 8px;
+                margin-bottom: 20px;
+                border: 1px solid var(--border-color);
+            }
+
+            .midi-player-card h4 {
+                color: var(--primary-color);
+                margin-bottom: 10px;
+                text-align: center;
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .hero h2 {
+                    font-size: 2.5rem;
+                }
+                .hero p {
+                    font-size: 1rem;
+                }
+                header .container {
+                    flex-direction: column;
+                    text-align: center;
+                }
+                nav ul {
+                    margin-top: 10px;
+                    justify-content: center;
+                }
+                nav ul li {
+                    margin: 0 10px;
+                }
+                .pipeline-step {
+                    padding: 20px 20px 20px 50px;
+                }
+                .pipeline-step::before {
+                    left: 10px;
+                    width: 25px;
+                    height: 25px;
+                    font-size: 0.8rem;
+                }
+                .pricing-card.popular::before {
+                    font-size: 0.7rem;
+                    top: 10px;
+                    right: -40px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .hero h2 {
+                    font-size: 2rem;
+                }
+                .cta-button {
+                    padding: 12px 25px;
+                    font-size: 1rem;
+                }
+                section h3 {
+                    font-size: 1.8rem;
+                }
+                .feature-card {
+                    padding: 20px;
+                }
+                .pricing-card {
+                    padding: 20px;
+                }
+                .price {
+                    font-size: 2rem;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <div class="container">
+                <h1>MidiMaker</h1>
+                <nav>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                        <li><a href="#examples">Listen to Examples</a></li>
+                        <li><a href="#pricing">Pricing</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="container">
+                <h2>Compose Unique MIDI Music with AI</h2>
+                <p>
+                    Leverage Large Language Models to turn your textual descriptions into coherent, structured musical
+                    pieces. Generate section by section for enhanced control and creativity.
+                </p>
+                <a href="#pricing" class="cta-button">Get Started Now</a>
+                <!-- Note: The image 'image.jpg' from the README should be placed in the same directory or path updated -->
+                <img
+                    src="image.jpg"
+                    alt="Abstract Music Visualization"
+                    style="
+                        max-width: 80%;
+                        height: auto;
+                        margin-top: 40px;
+                        border-radius: 8px;
+                        opacity: 0.8;
+                        display: none; /* Hide if image not available */
+                    "
+                />
+            </div>
+        </section>
+
+        <section id="features" class="features-section">
+            <div class="container">
+                <h3>Core Features</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="icon">♫</div>
+                        <h4>Text-to-MIDI Generation</h4>
+                        <p>
+                            Transform high-level musical ideas (e.g., "sad piano in C minor") into playable MIDI files
+                            using advanced AI.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">§</div>
+                        <h4>Sectional Generation</h4>
+                        <p>
+                            Break down music creation into manageable sections (A, B, C...) for improved coherence and
+                            structure in longer pieces.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">#</div>
+                        <h4>Compact Symbolic Format</h4>
+                        <p>
+                            Utilizes a concise, text-based music notation optimized for LLM processing and easy parsing
+                            into MIDI.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">⚙️</div>
+                        <h4>Algorithmic Conversion</h4>
+                        <p>
+                            A robust Python script (`music.py`) intelligently parses the symbolic format and generates
+                            the final MIDI output.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🧠</div>
+                        <h4>LLM-Powered Enrichment</h4>
+                        <p>
+                            Let the AI elaborate on your simple ideas, suggesting structure, instrumentation, tempo, and
+                            key signatures.
+                        </p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">↔️</div>
+                        <h4>Coherent Transitions</h4>
+                        <p>
+                            Guided prompts help ensure smooth musical development and logical transitions between
+                            generated sections.
+                        </p>
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section id="how-it-works" class="pipeline-section">
-        <div class="container">
-            <h3>Generation Pipeline</h3>
-            <ol class="pipeline-steps">
-                <li class="pipeline-step">
-                    <strong>1. Idea Enrichment</strong>
-                    <p>Start with a simple text description (e.g., "upbeat jazz trio"). The LLM expands it into a detailed musical plan.</p>
-                </li>
-                <li class="pipeline-step">
-                    <strong>2. Section A Generation</strong>
-                    <p>Provide the plan and a goal for the first section (e.g., "Intro, 16 bars, establish theme"). The LLM generates symbolic music for Section A.</p>
-                </li>
-                 <li class="pipeline-step">
-                    <strong>3. Subsequent Sections (B, C...)</strong>
-                    <p>Repeat the process for each new section, guiding the LLM to build upon previous parts and develop the music (e.g., "Section B, solo, build intensity").</p>
-                </li>
-                 <li class="pipeline-step">
-                    <strong>4. Concatenate Sections</strong>
-                    <p>Combine the symbolic text outputs from all generated sections into a single file.</p>
-                </li>
-                 <li class="pipeline-step">
-                    <strong>5. Convert to MIDI</strong>
-                    <p>Run the `music.py` script to parse the combined symbolic text and generate the final `.mid` file, ready to play.</p>
-                </li>
-            </ol>
-        </div>
-    </section>
+        <section id="how-it-works" class="pipeline-section">
+            <div class="container">
+                <h3>Generation Pipeline</h3>
+                <ol class="pipeline-steps">
+                    <li class="pipeline-step">
+                        <strong>1. Idea Enrichment</strong>
+                        <p>
+                            Start with a simple text description (e.g., "upbeat jazz trio"). The LLM expands it into a
+                            detailed musical plan.
+                        </p>
+                    </li>
+                    <li class="pipeline-step">
+                        <strong>2. Section A Generation</strong>
+                        <p>
+                            Provide the plan and a goal for the first section (e.g., "Intro, 16 bars, establish theme").
+                            The LLM generates symbolic music for Section A.
+                        </p>
+                    </li>
+                    <li class="pipeline-step">
+                        <strong>3. Subsequent Sections (B, C...)</strong>
+                        <p>
+                            Repeat the process for each new section, guiding the LLM to build upon previous parts and
+                            develop the music (e.g., "Section B, solo, build intensity").
+                        </p>
+                    </li>
+                    <li class="pipeline-step">
+                        <strong>4. Concatenate Sections</strong>
+                        <p>Combine the symbolic text outputs from all generated sections into a single file.</p>
+                    </li>
+                    <li class="pipeline-step">
+                        <strong>5. Convert to MIDI</strong>
+                        <p>
+                            Run the `music.py` script to parse the combined symbolic text and generate the final `.mid`
+                            file, ready to play.
+                        </p>
+                    </li>
+                </ol>
+            </div>
+        </section>
 
-    <section id="symbolic-format" class="symbolic-format-section">
-         <div class="container">
-             <h3>Compact Symbolic Format</h3>
-             <p>A human-readable yet concise format designed for efficient LLM generation and reliable parsing. It defines instruments, tempo, key, bars, notes, chords, and rests.</p>
-             <pre class="code-example"><span class="comment"># Example Snippet</span>
+        <section id="symbolic-format" class="symbolic-format-section">
+            <div class="container">
+                <h3>Compact Symbolic Format</h3>
+                <p>
+                    A human-readable yet concise format designed for efficient LLM generation and reliable parsing. It
+                    defines instruments, tempo, key, bars, notes, chords, and rests.
+                </p>
+                <pre class="code-example"><span class="comment"># Example Snippet</span>
 <span class="keyword">INST</span>:<span class="value">Pno</span>         <span class="comment">; Instrument: Piano</span>
 <span class="keyword">T</span>:<span class="value">120</span>           <span class="comment">; Tempo: 120 BPM</span>
 <span class="keyword">TS</span>:<span class="value">4/4</span>          <span class="comment">; Time Signature: 4/4</span>
@@ -567,91 +633,145 @@
 <span class="keyword">C</span>:<span class="value">LH:[F2,A2,C3]:H:65</span> <span class="comment">; Chord: Left Hand, F Major Triad, Half, Velocity 65</span>
 <span class="keyword">C</span>:<span class="value">LH:[G2,B2,D3]:H:65</span> <span class="comment">; Chord: Left Hand, G Major Triad, Half, Velocity 65</span>
 </pre>
-         </div>
-     </section>
+            </div>
+        </section>
 
-    <section id="pricing" class="pricing-section">
-        <div class="container">
-            <h3>Choose Your Plan</h3>
-            <div class="pricing-grid">
-                <div class="pricing-card">
-                    <div>
-                        <h4>Hobbyist</h4>
-                        <div class="price">$0<span>/month</span></div>
-                        <p>Perfect for experimenting and personal projects.</p>
-                        <ul>
-                            <li>Up to 5 minutes of music / month</li>
-                            <li>Standard LLM model</li>
-                            <li>Basic instrument set</li>
-                            <li>Community support</li>
-                        </ul>
-                    </div>
-                    <a href="#" class="cta-button" style="background-color: var(--secondary-color); border: 1px solid var(--primary-color);">Start Free</a>
+        <section id="examples" class="midi-examples-section">
+            <div class="container">
+                <h3>Listen to Examples</h3>
+                <p style="text-align: center; margin-bottom: 30px; color: var(--text-muted-color)">
+                    Hear the power of AI-generated music. Click play to listen to examples created with MidiMaker.
+                </p>
+
+                <div class="midi-player-card">
+                    <h4>Example 1: Energetic Electronic Piece</h4>
+                    <audio controls>
+                        <source src="output/generated_music_20250413_202715.mid" type="audio/midi" />
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
-                <div class="pricing-card popular">
-                     <div>
-                        <h4>Pro</h4>
-                        <div class="price">$19<span>/month</span></div>
-                        <p>For serious musicians and developers needing more power.</p>
-                        <ul>
-                            <li>Up to 60 minutes of music / month</li>
-                            <li>Advanced LLM model options</li>
-                            <li>Expanded instrument library</li>
-                            <li>Sectional generation controls</li>
-                            <li>Priority email support</li>
-                        </ul>
-                    </div>
-                    <a href="#" class="cta-button">Go Pro</a>
+
+                <div class="midi-player-card">
+                    <h4>Example 2: Melancholic Piano Ballad</h4>
+                    <audio controls>
+                        <source src="output/generated_music_20250413_211906.mid" type="audio/midi" />
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
-                <div class="pricing-card">
-                     <div>
-                        <h4>Enterprise</h4>
-                        <div class="price">Contact Us</div>
-                        <p>Tailored solutions for commercial use and large-scale projects.</p>
-                        <ul>
-                            <li>Unlimited music generation</li>
-                            <li>Custom LLM fine-tuning</li>
-                            <li>Custom instrument integration</li>
-                            <li>API access</li>
-                            <li>Dedicated support & SLA</li>
-                        </ul>
-                    </div>
-                    <a href="#" class="cta-button" style="background-color: var(--secondary-color); border: 1px solid var(--primary-color);">Contact Sales</a>
+
+                <div class="midi-player-card">
+                    <h4>Example 3: Upbeat Jazzy Track</h4>
+                    <audio controls>
+                        <source src="output/generated_music_20250413_131856.mid" type="audio/midi" />
+                        Your browser does not support the audio element.
+                    </audio>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-     <section id="considerations" class="design-considerations-section">
-        <div class="container">
-            <h3>Design Considerations & Challenges</h3>
-            <ul class="considerations-list">
-                <li><strong>LLM Prompt Engineering:</strong> Crafting effective prompts is crucial for musicality and format adherence.</li>
-                <li><strong>Symbolic Format Robustness:</strong> Balancing expressiveness with simplicity for LLM generation and parsing.</li>
-                <li><strong>Parsing Reliability:</strong> Ensuring `music.py` handles variations or minor errors in LLM output.</li>
-                <li><strong>Musical Cohesion:</strong> Maintaining smooth transitions and consistency across separately generated sections.</li>
-            </ul>
-        </div>
-    </section>
+        <section id="pricing" class="pricing-section">
+            <div class="container">
+                <h3>Choose Your Plan</h3>
+                <div class="pricing-grid">
+                    <div class="pricing-card">
+                        <div>
+                            <h4>Hobbyist</h4>
+                            <div class="price">$0<span>/month</span></div>
+                            <p>Perfect for experimenting and personal projects.</p>
+                            <ul>
+                                <li>Up to 5 minutes of music / month</li>
+                                <li>Standard LLM model</li>
+                                <li>Basic instrument set</li>
+                                <li>Community support</li>
+                            </ul>
+                        </div>
+                        <a
+                            href="#"
+                            class="cta-button"
+                            style="background-color: var(--secondary-color); border: 1px solid var(--primary-color)"
+                            >Start Free</a
+                        >
+                    </div>
+                    <div class="pricing-card popular">
+                        <div>
+                            <h4>Pro</h4>
+                            <div class="price">$19<span>/month</span></div>
+                            <p>For serious musicians and developers needing more power.</p>
+                            <ul>
+                                <li>Up to 60 minutes of music / month</li>
+                                <li>Advanced LLM model options</li>
+                                <li>Expanded instrument library</li>
+                                <li>Sectional generation controls</li>
+                                <li>Priority email support</li>
+                            </ul>
+                        </div>
+                        <a href="#" class="cta-button">Go Pro</a>
+                    </div>
+                    <div class="pricing-card">
+                        <div>
+                            <h4>Enterprise</h4>
+                            <div class="price">Contact Us</div>
+                            <p>Tailored solutions for commercial use and large-scale projects.</p>
+                            <ul>
+                                <li>Unlimited music generation</li>
+                                <li>Custom LLM fine-tuning</li>
+                                <li>Custom instrument integration</li>
+                                <li>API access</li>
+                                <li>Dedicated support & SLA</li>
+                            </ul>
+                        </div>
+                        <a
+                            href="#"
+                            class="cta-button"
+                            style="background-color: var(--secondary-color); border: 1px solid var(--primary-color)"
+                            >Contact Sales</a
+                        >
+                    </div>
+                </div>
+            </div>
+        </section>
 
-     <section id="future" class="future-enhancements-section">
-        <div class="container">
-            <h3>Future Enhancements</h3>
-             <ul class="future-enhancements-list">
-                 <li>Enhanced Symbolic Format (dynamics, articulations, pedal).</li>
-                 <li>Improved state management between section prompts.</li>
-                 <li>Configuration file for settings and format definitions.</li>
-                 <li>Integration of basic music theory constraints.</li>
-                 <li>Web interface for easier generation and management.</li>
-             </ul>
-        </div>
-    </section>
+        <section id="considerations" class="design-considerations-section">
+            <div class="container">
+                <h3>Design Considerations & Challenges</h3>
+                <ul class="considerations-list">
+                    <li>
+                        <strong>LLM Prompt Engineering:</strong> Crafting effective prompts is crucial for musicality
+                        and format adherence.
+                    </li>
+                    <li>
+                        <strong>Symbolic Format Robustness:</strong> Balancing expressiveness with simplicity for LLM
+                        generation and parsing.
+                    </li>
+                    <li>
+                        <strong>Parsing Reliability:</strong> Ensuring `music.py` handles variations or minor errors in
+                        LLM output.
+                    </li>
+                    <li>
+                        <strong>Musical Cohesion:</strong> Maintaining smooth transitions and consistency across
+                        separately generated sections.
+                    </li>
+                </ul>
+            </div>
+        </section>
 
-    <footer>
-        <div class="container">
-            <p>&copy; 2024 MidiMaker Generator. AI-powered creativity.</p>
-        </div>
-    </footer>
+        <section id="future" class="future-enhancements-section">
+            <div class="container">
+                <h3>Future Enhancements</h3>
+                <ul class="future-enhancements-list">
+                    <li>Enhanced Symbolic Format (dynamics, articulations, pedal).</li>
+                    <li>Improved state management between section prompts.</li>
+                    <li>Configuration file for settings and format definitions.</li>
+                    <li>Integration of basic music theory constraints.</li>
+                    <li>Web interface for easier generation and management.</li>
+                </ul>
+            </div>
+        </section>
 
-</body>
+        <footer>
+            <div class="container">
+                <p>&copy; 2024 MidiMaker Generator. AI-powered creativity.</p>
+            </div>
+        </footer>
+    </body>
 </html>
