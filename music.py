@@ -39,9 +39,9 @@ CONFIG = {
     "default_key": "Cmin",  # Will likely be overridden by enrichment
     "generation_retries": 3,
     "generation_delay": 5,  # Seconds between retries
-    "max_total_bars": 128,  # Limit total length for safety/cost
-    "min_section_bars": 16,  # Minimum bars per generated section
-    "max_section_bars": 32,  # Maximum bars per generated section
+    "max_total_bars": 64,  # Limit total length for safety/cost
+    "min_section_bars": 8,  # Minimum bars per generated section
+    "max_section_bars": 16,  # Maximum bars per generated section
     "temperature": 0.7,  # LLM Temperature for creativity vs predictability
     "safety_settings": {  # Configure content safety settings for Gemini
         # Options: BLOCK_NONE, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE, BLOCK_LOW_AND_ABOVE
@@ -69,26 +69,56 @@ TrackIDs: Use simple names like RH, LH, Melody, Bass, Drums, Arp1, Pad, Lead etc
 PitchNames: Standard notation (e.g., C4, F#5, Gb3). Middle C is C4. For Drums (when INST is Drs/Drums), use names like Kick, Snare, HHC, HHO, Crash, Ride, HT, MT, LT (case-insensitive).
 DurationSymbols: W (Whole), H (Half), Q (Quarter), E (Eighth), S (Sixteenth), T (Thirty-second). Append '.' for dotted notes (e.g., Q., E.).
 Velocity: MIDI velocity (0-127). Must be a number.
+Do not use standard notes on drum track!
+Do not use drum names for instrument tracks!
 
-Example Note: N:Melody:G5:E:95
+
+Example Note: N:SynthBass:G5:E:95
 Example Chord: C:PnoLH:[C3,Eb3,G3]:H:60
 Example Rest: R:Bass:W
-Example Drums:
-INST:Drs
+Example Drum: N:Drums:Kick:Q:95
+Example output:
+
+K:Amaj
+T:160
+TS:4/4
+INST:SynthPad
+INST:SynthBass
+INST:ElecDrums
+INST:SynthLead
 BAR:1
-N:Drums:Kick:Q:100
+C:SynthPad:[A3,C#4,E4,G#4]:W:55
+N:SynthBass:A2:Q.:100
+N:SynthBass:E2:E:100
+N:SynthBass:A2:H:100
+N:Drums:Kick:Q:95
 N:Drums:HHC:E:80
-N:Drums:Snare:Q:110
 N:Drums:HHC:E:80
-Example Multi-Instrument within a bar:
-INST:SynLead
-BAR:5
-N:LeadMelody:C5:Q:90
-R:LeadMelody:Q
-N:LeadMelody:E5:H:95
-INST:SynPad
-BAR:5
-C:PadChord:[C3,Eb3,G3,Bb4]:W:50
+N:Drums:Snare:Q:90
+N:Drums:Kick:E:95
+N:Drums:Kick:E:95
+N:Drums:HHC:E:80
+N:Drums:HHC:E:80
+R:SynthLead:H
+N:SynthLead:C#5:Q:95
+N:SynthLead:E5:Q:95
+BAR:2
+C:SynthPad:[E3,G#3,B3,D#4]:W:55
+N:SynthBass:E2:Q.:100
+N:SynthBass:B2:E:100
+N:SynthBass:E2:H:100
+N:Drums:Kick:Q:95
+N:Drums:HHC:E:80
+N:Drums:HHC:E:80
+N:Drums:Snare:Q:90
+N:Drums:HHC:E:80
+N:Drums:HHC:E:80
+N:Drums:Kick:E:95
+N:Drums:HHC:E:80
+N:SynthLead:F#5:H:95
+N:SynthLead:E5:Q:95
+R:SynthLead:Q
+
 """
 
 # --- Helper Functions ---
@@ -124,6 +154,7 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
     Returns:
         str, dict, or None: The generated content, or None if generation failed after retries.
     """
+    print(f"Prompt: {prompt}")
     retries = retries if retries is not None else CONFIG["generation_retries"]
     delay = delay if delay is not None else CONFIG["generation_delay"]
     model = genai.GenerativeModel(CONFIG["gemini_model"])
@@ -239,172 +270,171 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
 
 PITCH_MAP = {"C": 0, "D": 2, "E": 4, "F": 5, "G": 7, "A": 9, "B": 11}
 ACCIDENTAL_MAP = {"#": 1, "S": 1, "B": -1, "": 0}  # Allow S for sharp
-
 # General MIDI Instrument Program Numbers (Expanded Selection)
 INSTRUMENT_PROGRAM_MAP = {
     # Piano
     "pno": 0,
-    "piano": 0,
-    "acoustic grand piano": 0,
-    "bright acoustic piano": 1,
-    "electric grand piano": 2,
-    "honky-tonk piano": 3,
-    "electric piano 1": 4,
-    "rhodes piano": 4,
-    "electric piano 2": 5,
+    "Piano": 0,
+    "Acoustic grand piano": 0,
+    "Bright acoustic piano": 1,
+    "Electric grand piano": 2,
+    "Honky-tonk piano": 3,
+    "Electric piano 1": 4,
+    "Rhodes piano": 4,
+    "Electric piano 2": 5,
     # Chromatic Percussion
-    "celesta": 8,
-    "glockenspiel": 9,
-    "music box": 10,
-    "vibraphone": 11,
-    "marimba": 12,
-    "xylophone": 13,
-    "tubular bells": 14,
-    "dulcimer": 15,
+    "Celesta": 8,
+    "Glockenspiel": 9,
+    "Music box": 10,
+    "Vibraphone": 11,
+    "Marimba": 12,
+    "Xylophone": 13,
+    "Tubular bells": 14,
+    "Dulcimer": 15,
     # Organ
     "org": 16,
-    "organ": 16,
-    "drawbar organ": 16,
-    "percussive organ": 17,
-    "rock organ": 18,
-    "church organ": 19,
-    "reed organ": 20,
-    "accordion": 21,
-    "harmonica": 22,
-    "tango accordion": 23,
+    "Organ": 16,
+    "Drawbar organ": 16,
+    "Percussive organ": 17,
+    "Rock organ": 18,
+    "Church organ": 19,
+    "Reed organ": 20,
+    "Accordion": 21,
+    "Harmonica": 22,
+    "Tango accordion": 23,
     # Guitar
     "gtr": 25,
-    "acoustic guitar": 25,
-    "nylon guitar": 24,
-    "steel guitar": 25,
-    "electric guitar": 27,
-    "jazz guitar": 26,
-    "clean electric guitar": 27,
-    "muted electric guitar": 28,
-    "overdriven guitar": 29,
-    "distortion guitar": 30,
-    "guitar harmonics": 31,
+    "Acoustic guitar": 25,
+    "Nylon guitar": 24,
+    "Steel guitar": 25,
+    "Electric guitar": 27,
+    "Jazz guitar": 26,
+    "Clean electric guitar": 27,
+    "Muted electric guitar": 28,
+    "Overdriven guitar": 29,
+    "Distortion guitar": 30,
+    "Guitar harmonics": 31,
     # Bass
-    "bass": 33,
-    "acoustic bass": 32,
-    "electric bass": 33,
-    "finger bass": 33,
-    "pick bass": 34,
-    "fretless bass": 35,
-    "slap bass": 36,
-    "synth bass": 38,
-    "synthbass": 38,
-    "synth bass 2": 39,
+    "Bass": 33,
+    "Acoustic bass": 32,
+    "Electric bass": 33,
+    "Finger bass": 33,
+    "Pick bass": 34,
+    "Fretless bass": 35,
+    "Slap bass": 36,
+    "Synth bass": 38,
+    "Synthbass": 38,
+    "Synth bass 2": 39,
     # Strings
     "str": 48,
-    "strings": 48,
-    "violin": 40,
-    "viola": 41,
-    "cello": 42,
-    "contrabass": 43,
-    "tremolo strings": 44,
-    "pizzicato strings": 45,
-    "orchestral harp": 46,
-    "timpani": 47,
-    "string ensemble 1": 48,
-    "string ensemble 2": 49,
-    "synth strings 1": 50,
-    "synth strings 2": 51,
+    "Strings": 48,
+    "Violin": 40,
+    "Viola": 41,
+    "Cello": 42,
+    "Contrabass": 43,
+    "Tremolo strings": 44,
+    "Pizzicato strings": 45,
+    "Orchestral harp": 46,
+    "Timpani": 47,
+    "String ensemble 1": 48,
+    "String ensemble 2": 49,
+    "Synth strings 1": 50,
+    "Synth strings 2": 51,
     # Brass
     "tpt": 56,
-    "trumpet": 56,
-    "trombone": 57,
-    "tuba": 58,
-    "muted trumpet": 59,
-    "french horn": 60,
-    "brass section": 61,
-    "synth brass 1": 62,
-    "synth brass 2": 63,
+    "Trumpet": 56,
+    "Trombone": 57,
+    "Tuba": 58,
+    "Muted trumpet": 59,
+    "French horn": 60,
+    "Brass section": 61,
+    "Synth brass 1": 62,
+    "Synth brass 2": 63,
     # Reed
     "sax": 65,
-    "soprano sax": 64,
-    "alto sax": 65,
-    "tenor sax": 66,
-    "baritone sax": 67,
-    "oboe": 68,
-    "english horn": 69,
-    "bassoon": 70,
-    "clarinet": 71,
+    "Soprano sax": 64,
+    "Alto sax": 65,
+    "Tenor sax": 66,
+    "Baritone sax": 67,
+    "Oboe": 68,
+    "English horn": 69,
+    "Bassoon": 70,
+    "Clarinet": 71,
     # Pipe
     "flt": 73,
-    "flute": 73,
-    "piccolo": 72,
-    "recorder": 74,
-    "pan flute": 75,
-    "blown bottle": 76,
-    "shakuhachi": 77,
-    "whistle": 78,
-    "ocarina": 79,
+    "Flute": 73,
+    "Piccolo": 72,
+    "Recorder": 74,
+    "Pan flute": 75,
+    "Blown bottle": 76,
+    "Shakuhachi": 77,
+    "Whistle": 78,
+    "Ocarina": 79,
     # Synth Lead
     "synlead": 81,
-    "synth lead": 81,
-    "lead 1 (square)": 80,
-    "lead 2 (sawtooth)": 81,
-    "lead 3 (calliope)": 82,
-    "lead 4 (chiff)": 83,
-    "lead 5 (charang)": 84,
-    "lead 6 (voice)": 85,
-    "lead 7 (fifths)": 86,
-    "lead 8 (bass + lead)": 87,
+    "Synth lead": 81,
+    "Lead 1 (square)": 80,
+    "Lead 2 (sawtooth)": 81,
+    "Lead 3 (calliope)": 82,
+    "Lead 4 (chiff)": 83,
+    "Lead 5 (charang)": 84,
+    "Lead 6 (voice)": 85,
+    "Lead 7 (fifths)": 86,
+    "Lead 8 (bass + lead)": 87,
     # Synth Pad
     "synpad": 89,
-    "synth pad": 89,
-    "pad 1 (new age)": 88,
-    "pad 2 (warm)": 89,
-    "pad 3 (polysynth)": 90,
-    "pad 4 (choir)": 91,
-    "pad 5 (bowed)": 92,
-    "pad 6 (metallic)": 93,
-    "pad 7 (halo)": 94,
-    "pad 8 (sweep)": 95,
+    "Synth pad": 89,
+    "Pad 1 (new age)": 88,
+    "Pad 2 (warm)": 89,
+    "Pad 3 (polysynth)": 90,
+    "Pad 4 (choir)": 91,
+    "Pad 5 (bowed)": 92,
+    "Pad 6 (metallic)": 93,
+    "Pad 7 (halo)": 94,
+    "Pad 8 (sweep)": 95,
     # Synth FX
-    "fx 1 (rain)": 96,
-    "fx 2 (soundtrack)": 97,
-    "fx 3 (crystal)": 98,
-    "fx 4 (atmosphere)": 99,
-    "fx 5 (brightness)": 100,
-    "fx 6 (goblins)": 101,
-    "fx 7 (echoes)": 102,
-    "fx 8 (sci-fi)": 103,
+    "Fx 1 (rain)": 96,
+    "Fx 2 (soundtrack)": 97,
+    "Fx 3 (crystal)": 98,
+    "Fx 4 (atmosphere)": 99,
+    "Fx 5 (brightness)": 100,
+    "Fx 6 (goblins)": 101,
+    "Fx 7 (echoes)": 102,
+    "Fx 8 (sci-fi)": 103,
     # Ethnic
-    "sitar": 104,
-    "banjo": 105,
-    "shamisen": 106,
-    "koto": 107,
-    "kalimba": 108,
-    "bag pipe": 109,
-    "fiddle": 110,
-    "shanai": 111,
+    "Sitar": 104,
+    "Banjo": 105,
+    "Shamisen": 106,
+    "Koto": 107,
+    "Kalimba": 108,
+    "Bag pipe": 109,
+    "Fiddle": 110,
+    "Shanai": 111,
     # Percussive
-    "tinkle bell": 112,
-    "agogo": 113,
-    "steel drums": 114,
-    "woodblock": 115, # Note: GM has High/Low on drum channel
-    "taiko drum": 116,
-    "melodic tom": 117,
-    "synth drum": 118,
-    "reverse cymbal": 119,
+    "Tinkle bell": 112,
+    "Agogo": 113,
+    "Steel drums": 114,
+    "Woodblock": 115, # Note: GM has High/Low on drum channel
+    "Taiko drum": 116,
+    "Melodic tom": 117,
+    "Synth drum": 118,
+    "Reverse cymbal": 119,
     # Sound Effects
-    "guitar fret noise": 120,
-    "breath noise": 121,
-    "seashore": 122,
-    "bird tweet": 123,
-    "telephone ring": 124,
-    "helicopter": 125,
-    "applause": 126,
-    "gunshot": 127,
+    "Guitar fret noise": 120,
+    "Breath noise": 121,
+    "Seashore": 122,
+    "Bird tweet": 123,
+    "Telephone ring": 124,
+    "Helicopter": 125,
+    "Applause": 126,
+    "Gunshot": 127,
     # Arp (Mapped to a synth sound)
     "arp": 81,  # Map Arp to Sawtooth Lead by default
     # Drums are a special case (channel 10 / index 9) - Program 0 is conventional
     "drs": 0,
-    "drums": 0,
+    "Drums": 0,
     "808drums": 0,
-    "drumkit": 0,
+    "Drumkit": 0,
 }
 # Set of lowercase names for checking INST if it's a drum track
 DRUM_INSTRUMENT_NAMES = {
@@ -733,7 +763,6 @@ Generate ONLY the JSON plan now, starting with {{ and ending with }}. Do not inc
         # Validate the plan
         validated_plan = {}
         total_bars = 0
-        is_valid = True
         # Attempt to preserve order if OrderedDict or Python 3.7+ dict
         section_order = list(plan_json.keys())
 
@@ -741,7 +770,6 @@ Generate ONLY the JSON plan now, starting with {{ and ending with }}. Do not inc
             info = plan_json[name]
             if not isinstance(name, str) or not name.strip():
                 print(f"Warning: Invalid section name '{name}'. Skipping.")
-                is_valid = False
                 continue
 
             section_name = name.strip()
