@@ -29,7 +29,7 @@ CONFIG = {
     "api_key": os.environ.get("GEMINI_KEY"),
     "openai_model": "o4-mini", 
     "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
-    "use_openai": True,  # Set to True to use OpenAI instead of Gemini
+    "use_openai": False,  # Set to True to use OpenAI instead of Gemini
     "initial_description": "Fast-paced electronic dance track with a driving bass and sharp synths. (Energetic, techno, fast)",
     "output_dir": "output",
     "default_tempo": 120,
