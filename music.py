@@ -23,20 +23,14 @@ import google.generativeai as genai
 import openai
 import pretty_midi
 
-# --- Configuration ---
-GEMINI_KEY = os.environ.get("GEMINI_KEY", "")  # Placeholder - Replace or use env var
-
-# Configure the Gemini model to use
-GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
-
 # Configuration dictionary
 CONFIG = {
-    "api_key": GEMINI_KEY,
-    "gemini_model": GEMINI_MODEL,
+    "gemini_model": "gemini-2.5-pro-exp-03-25", #"gemini-2.0-flash-thinking-exp-01-21" 
+    "api_key": os.environ.get("GEMINI_KEY"),
+    "openai_model": "o4-mini", 
     "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
-    "openai_model": "o3-mini", 
-    "max_tokens": 7500,        # OpenAI specific: Max tokens for the completion
-    "initial_description": "disco pop song with a catchy melody and upbeat tempo",
+    "use_openai": True,  # Set to True to use OpenAI instead of Gemini
+    "initial_description": "Fast-paced electronic dance track with a driving bass and sharp synths. (Energetic, techno, fast)",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
@@ -177,6 +171,9 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
         str, dict, or None: The generated content, or None if generation failed after retries.
     """
     # print(f"Prompt: {prompt}") # Uncomment for debugging prompts
+    if CONFIG["use_openai"]:
+        #print("Warning: Gemini API is disabled. Using OpenAI instead.")
+        return call_openai(prompt, retries, delay, output_format)
     retries = retries if retries is not None else CONFIG["generation_retries"]
     delay = delay if delay is not None else CONFIG["generation_delay"]
     model = genai.GenerativeModel(CONFIG["gemini_model"])
@@ -303,8 +300,6 @@ def call_openai(prompt, retries=None, delay=None, output_format="text"):
     retries = retries if retries is not None else CONFIG.get("generation_retries", 3)
     delay = delay if delay is not None else CONFIG.get("generation_delay", 5)
     model_name = CONFIG.get("openai_model", "gpt-3.5-turbo-0125") # Default fallback
-    temperature = CONFIG.get("temperature", 0.7)
-    max_tokens = CONFIG.get("max_tokens", 1024) # Good practice to set a max
 
     # Prepare messages for OpenAI ChatCompletion format
     messages = [{"role": "user", "content": prompt}]
@@ -313,8 +308,7 @@ def call_openai(prompt, retries=None, delay=None, output_format="text"):
     api_args = {
         "model": model_name,
         "messages": messages,
-        "temperature": temperature,
-        "max_tokens": max_tokens,
+        "reasoning_effort": "high"  # This can be set to low, medium or high.
     }
 
     # Use OpenAI's JSON mode if requested
@@ -777,6 +771,8 @@ Instructions:
 5. Ensure musical coherence within the section and try to achieve the Section Goal.
 6. The total duration of notes/rests/chords within each bar MUST add up precisely according to the active time signature (e.g., 4 quarter notes in 4/4, 6 eighth notes in 6/8). Be precise. Use rests (R:<Track>:<Duration>) to fill empty time accurately for each active track within a bar. Ensure parallel tracks are synchronized at bar lines.
 7. End the generation cleanly *after* the content for bar {current_bar + bars - 1} is complete. Do NOT include `BAR:{current_bar + bars}`.
+8. Instrument names should be in lowercase (e.g., "piano", "guitar", "drums"). List of melodic instruments: {INSTRUMENT_PROGRAM_MAP.keys()}.
+9. Use the following note names for drums: {DRUM_PITCH_MAP.keys()}.
 
 {SYMBOLIC_FORMAT_DEFINITION}
 
