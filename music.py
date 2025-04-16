@@ -20,18 +20,22 @@ import time
 import traceback
 
 import google.generativeai as genai
+import openai
 import pretty_midi
 
 # --- Configuration ---
 GEMINI_KEY = os.environ.get("GEMINI_KEY", "")  # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
-GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-exp-image-generation" 
+GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
 
 # Configuration dictionary
 CONFIG = {
     "api_key": GEMINI_KEY,
     "gemini_model": GEMINI_MODEL,
+    "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
+    "openai_model": "o3-mini", 
+    "max_tokens": 7500,        # OpenAI specific: Max tokens for the completion
     "initial_description": "disco pop song with a catchy melody and upbeat tempo",
     "output_dir": "output",
     "default_tempo": 120,
@@ -142,6 +146,21 @@ def configure_genai():
         print(f"Error configuring Generative AI: {e}")
         print("Please ensure your GEMINI_KEY is set correctly and valid.")
         exit(1)
+    # --- OpenAI Client Initialization ---
+    # Ensure the API key is set, either directly or via environment variable
+    if not CONFIG.get("openai_api_key"):
+        print("Warning: OPENAI_KEY not found in environment or CONFIG.")
+        # Optionally raise an error or handle differently
+        # raise ValueError("OpenAI API key is required.")
+        global client;
+        client = None # Indicate client couldn't be initialized
+    else:
+        try:
+            client = openai.OpenAI(api_key=CONFIG["openai_api_key"])
+            print(f"OpenAI SDK configured using model: {CONFIG['openai_model']}")
+        except Exception as e:
+            print(f"Error initializing OpenAI client: {e}")
+            client = None
 
 
 def call_gemini(prompt, retries=None, delay=None, output_format="text"):
@@ -162,8 +181,6 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
     delay = delay if delay is not None else CONFIG["generation_delay"]
     model = genai.GenerativeModel(CONFIG["gemini_model"])
     gen_config_args = {"temperature": CONFIG["temperature"]}
-    if output_format == "json":
-        gen_config_args["response_mime_type"] = "application/json"
 
     generation_config = genai.types.GenerationConfig(**gen_config_args)
     safety_settings = CONFIG.get("safety_settings")
@@ -264,6 +281,144 @@ def call_gemini(prompt, retries=None, delay=None, output_format="text"):
             return None
     return None
 
+
+def call_openai(prompt, retries=None, delay=None, output_format="text"):
+    """
+    Calls the OpenAI API with the specified prompt and handles retries.
+
+    Args:
+        prompt (str): The prompt to send to the LLM.
+        retries (int, optional): Maximum number of retry attempts. Defaults to CONFIG['generation_retries'].
+        delay (int, optional): Delay in seconds between retries. Defaults to CONFIG['generation_delay'].
+        output_format (str): Expected output format ('text' or 'json').
+
+    Returns:
+        str, dict, or None: The generated content, or None if generation failed after retries.
+    """
+    if client is None:
+        print("Error: OpenAI client not initialized. Cannot make API call.")
+        return None
+
+    # print(f"Prompt: {prompt}") # Uncomment for debugging prompts
+    retries = retries if retries is not None else CONFIG.get("generation_retries", 3)
+    delay = delay if delay is not None else CONFIG.get("generation_delay", 5)
+    model_name = CONFIG.get("openai_model", "gpt-3.5-turbo-0125") # Default fallback
+    temperature = CONFIG.get("temperature", 0.7)
+    max_tokens = CONFIG.get("max_tokens", 1024) # Good practice to set a max
+
+    # Prepare messages for OpenAI ChatCompletion format
+    messages = [{"role": "user", "content": prompt}]
+
+    # Prepare API call arguments
+    api_args = {
+        "model": model_name,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+
+    # Use OpenAI's JSON mode if requested
+    if output_format == "json":
+        # Note: For JSON mode to work reliably, your prompt should explicitly
+        # instruct the model to output JSON.
+        # Models like gpt-3.5-turbo-0125 and later support this well.
+        api_args["response_format"] = {"type": "json_object"}
+        # print("DEBUG: Requesting JSON format from OpenAI.") # Uncomment for debugging
+
+    for attempt in range(retries):
+        try:
+            response = client.chat.completions.create(**api_args)
+
+            # Debug: Print raw response structure if needed
+            # print(f"DEBUG: OpenAI Response (Attempt {attempt + 1}): {response.model_dump_json(indent=2)}")
+
+            if not response.choices:
+                print(f"Warning: Received response with no choices (Attempt {attempt + 1}).")
+                # Fall through to retry logic
+
+            choice = response.choices[0]
+            finish_reason = choice.finish_reason
+
+            # Check finish reason
+            if finish_reason == "stop":
+                content = choice.message.content
+                if content:
+                    content = content.strip()
+                else:
+                     print(f"Warning: Received 'stop' finish reason but no content (Attempt {attempt + 1}).")
+                     # Fall through to retry logic
+                     continue # Go to next retry attempt
+
+            elif finish_reason == "length":
+                print(f"Warning: Generation stopped due to length (max_tokens reached) on attempt {attempt + 1}.")
+                # Return partial content, as it might still be useful
+                content = choice.message.content.strip() if choice.message.content else None
+                # Decide if you want to return partial or retry. Let's return partial for now.
+
+            elif finish_reason == "content_filter":
+                print(f"Generation stopped due to OpenAI content filter (Attempt {attempt + 1}).")
+                # This is similar to Gemini's block reason
+                return None # Content is blocked, unlikely to succeed on retry
+
+            else: # Other reasons like 'tool_calls' (if applicable) or unexpected ones
+                print(f"Generation stopped for reason: {finish_reason} on attempt {attempt + 1}.")
+                content = choice.message.content.strip() if choice.message.content else None
+                # Potentially retry if content is None, otherwise process what we have
+
+            # Process the content based on expected format
+            if content is not None:
+                if output_format == "json":
+                    try:
+                        # If using response_format={"type": "json_object"},
+                        # OpenAI should guarantee valid JSON string.
+                        return json.loads(content)
+                    except json.JSONDecodeError as json_e:
+                        print(
+                            f"Error decoding JSON response even with JSON mode (Attempt {attempt + 1}): {json_e}"
+                        )
+                        print(f"Received text: {content[:500]}...")
+                        # Fall through to retry logic as the model failed to produce valid JSON
+                else: # output_format == "text"
+                    # Clean potential markdown code blocks if not expecting JSON
+                    content_cleaned = re.sub(
+                        r"^```[a-z]*\n?",
+                        "",
+                        content,
+                        flags=re.MULTILINE | re.IGNORECASE,
+                    )
+                    content_cleaned = re.sub(r"\n?```$", "", content_cleaned)
+                    return content_cleaned.strip()
+
+            # If we reached here, content was None or JSON decoding failed
+            print(f"Warning: Could not extract or process valid content (Attempt {attempt + 1}). Finish Reason: {finish_reason}")
+
+
+        except openai.APIError as e:
+            # Handle API errors (e.g., server issues)
+            print(f"OpenAI API Error (Attempt {attempt + 1}/{retries}): {e}")
+        except openai.RateLimitError as e:
+            # Handle rate limit errors
+            print(f"OpenAI Rate Limit Error (Attempt {attempt + 1}/{retries}): {e}")
+            # Rate limit errors often benefit most from delays
+        except openai.AuthenticationError as e:
+             print(f"OpenAI Authentication Error: {e}. Check your API key.")
+             return None # No point retrying if auth fails
+        except Exception as e:
+            # Handle other potential errors (network issues, etc.)
+            print(f"Error calling OpenAI API (Attempt {attempt + 1}/{retries}): {e}")
+            traceback.print_exc()
+
+        # Wait before retrying if it wasn't the last attempt
+        if attempt < retries - 1:
+            print(f"Retrying in {delay} seconds...")
+            time.sleep(delay)
+        else:
+            print("Max retries reached. Failing.")
+            return None
+
+    # Should technically not be reached if loop completes, but as a safeguard:
+    print("Exited retry loop unexpectedly. Failing.")
+    return None
 
 # --- Music Data Structures and Mappings ---
 
