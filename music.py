@@ -26,7 +26,7 @@ import pretty_midi
 GEMINI_KEY = os.environ.get("GEMINI_KEY", "")  # Placeholder - Replace or use env var
 
 # Configure the Gemini model to use
-GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21" 
+GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-exp-image-generation" 
 
 # Configuration dictionary
 CONFIG = {
