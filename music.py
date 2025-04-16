@@ -32,7 +32,7 @@ GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21"
 CONFIG = {
     "api_key": GEMINI_KEY,
     "gemini_model": GEMINI_MODEL,
-    "initial_description": "jean michelle jarr cosmic style composition",
+    "initial_description": "disco pop song with a catchy melody and upbeat tempo",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
@@ -40,11 +40,11 @@ CONFIG = {
     "default_program": 0, # Default GM Program (Acoustic Grand Piano)
     "default_instrument_name": "Piano", # Default instrument name
     "generation_retries": 3,
-    "generation_delay": 5,  # Seconds between retries
+    "generation_delay": 65,  # Seconds between retries
     "max_total_bars": 128,  # Limit total length for safety/cost
     "min_section_bars": 8,  # Minimum bars per generated section
     "max_section_bars": 32,  # Maximum bars per generated section
-    "temperature": 0.95,  # LLM Temperature for creativity vs predictability
+    "temperature": 0.7,  # LLM Temperature for creativity vs predictability
     "safety_settings": {  # Configure content safety settings for Gemini
         # Options: BLOCK_NONE, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE, BLOCK_LOW_AND_ABOVE
         "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
