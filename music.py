@@ -32,7 +32,7 @@ GEMINI_MODEL = "gemini-2.5-pro-exp-03-25" #"gemini-2.0-flash-thinking-exp-01-21"
 CONFIG = {
     "api_key": GEMINI_KEY,
     "gemini_model": GEMINI_MODEL,
-    "initial_description": "trans electronic hiphop cosmic ambient music fast 160 bpm optimistic",
+    "initial_description": "art rock king crimson style music with a lot of dissonance",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
@@ -41,10 +41,10 @@ CONFIG = {
     "default_instrument_name": "Piano", # Default instrument name
     "generation_retries": 3,
     "generation_delay": 5,  # Seconds between retries
-    "max_total_bars": 64,  # Limit total length for safety/cost
+    "max_total_bars": 128,  # Limit total length for safety/cost
     "min_section_bars": 8,  # Minimum bars per generated section
-    "max_section_bars": 16,  # Maximum bars per generated section
-    "temperature": 0.7,  # LLM Temperature for creativity vs predictability
+    "max_section_bars": 32,  # Maximum bars per generated section
+    "temperature": 0.75,  # LLM Temperature for creativity vs predictability
     "safety_settings": {  # Configure content safety settings for Gemini
         # Options: BLOCK_NONE, BLOCK_ONLY_HIGH, BLOCK_MEDIUM_AND_ABOVE, BLOCK_LOW_AND_ABOVE
         "HARM_CATEGORY_HARASSMENT": "BLOCK_NONE",
@@ -1068,8 +1068,8 @@ def create_midi_file(
                     final_tempo_times.append(t)
                     final_tempo_bpm.append(unique_tempo_times[t])
             if final_tempo_times:
-                tempo_change_mpq = [pretty_midi.bpm_to_tempo(bpm) for bpm in final_tempo_bpm]
-                midi_obj._load_tempo_changes(final_tempo_times, tempo_change_mpq)
+                #tempo_change_mpq = [pretty_midi.bpm_to_tempo(bpm) for bpm in final_tempo_bpm]
+                #midi_obj._load_tempo_changes(final_tempo_times, tempo_change_mpq)
                 print(f"Applied {len(final_tempo_times)} tempo change events.")
 
         # Time Signature Changes
