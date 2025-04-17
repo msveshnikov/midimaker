@@ -1328,7 +1328,7 @@ def create_midi_file(
 # --- Main Execution ---
 if __name__ == "__main__":
     print("Starting MidiMaker Generator Pipeline...")
-    print(f"Using Model: {CONFIG['gemini_model']}")
+    #print(f"Using Model: {CONFIG['gemini_model']}")
     configure_genai()
 
     enriched_description, structure_hint = enrich_music_description(CONFIG["initial_description"])
