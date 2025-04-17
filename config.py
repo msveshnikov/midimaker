@@ -7,12 +7,12 @@ import os
 
 # Configuration dictionary
 CONFIG = {
-    "gemini_model": "gemini-2.5-pro-exp-03-25", #"gemini-2.0-flash-thinking-exp-01-21" 
+    "gemini_model": "gemini-2.5-flash-preview-04-17", #"gemini-2.0-flash-thinking-exp-01-21" 
     "api_key": os.environ.get("GEMINI_KEY"),
     "openai_model": "o4-mini", 
     "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
     "use_openai": False,  # Set to True to use OpenAI instead of Gemini
-    "initial_description": "Fast-paced electronic dance track with a driving bass and sharp synths. (Energetic, techno, fast)",
+    "initial_description": "Ambient soundscape with evolving textures and ethereal pads. (Ambient, atmospheric, subtle)",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
