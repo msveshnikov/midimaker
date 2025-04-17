@@ -79,6 +79,7 @@ The project follows a pipeline architecture, processing the musical idea through
 -   **Compact Symbolic Format:** A crucial intermediate representation defined within the script (`SYMBOLIC_FORMAT_DEFINITION`) and used in prompts. It acts as the communication language between the LLM and the parser.
 -   **Parser (`parse_symbolic_to_structured_data`):** Translates the LLM's symbolic output into a structured format suitable for MIDI generation. It handles time calculation based on tempo/time signature and manages musical context.
 -   **MIDI Generator (`create_midi_file`):** Uses the `pretty_midi` library to synthesize the final MIDI file from the parser's structured data. It maps parsed information to standard MIDI events and structures.
+-   **`index.html` (Implied):** Suggests a potential web-based user interface for interacting with the generation process.
 
 ## 4. Compact Symbolic Format
 
@@ -119,10 +120,18 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 
 ## 6. Future Enhancements
 
--   **Enhanced Symbolic Format:** Add commands for gradual tempo/dynamic changes (`TempoCurve`, `DynCurve`), articulations (`Art:Staccato`), pedal markings (`Pedal:On/Off`), etc.
--   **Improved State Management:** Implement more sophisticated methods for passing detailed musical context (e.g., last few notes/chords, harmonic context) between sectional generation prompts instead of just textual summaries.
--   **User Interface:** Develop a simple GUI or Web UI for easier input of descriptions, section definitions, and triggering the generation process.
--   **Music Theory Constraints:** Explore incorporating basic music theory rules (e.g., voice leading, harmonic progressions) either via constraints in the LLM prompt or as post-processing steps on the symbolic output.
--   **Alternative LLMs/Libraries:** Adapt the pipeline to work with other LLMs or MIDI generation libraries.
+-   **Enhanced Symbolic Format:** Extend the format to support:
+    -   Gradual tempo/dynamic changes (e.g., `TempoCurve`, `DynCurve`).
+    -   Musical articulations (e.g., `Art:Staccato`, `Art:Legato`).
+    -   Pedal markings (`Pedal:On/Off`).
+    -   More complex rhythmic notations (e.g., tuplets).
+    -   Consider exploring compatibility or conversion layers for formats like ABC notation.
+-   **Improved Context Passing:** Implement more sophisticated methods for passing musical context between section generation prompts, potentially including:
+    -   Last few bars of symbolic notation from the previous section.
+    -   Current harmonic context or key modulation information.
+    -   Specific melodic motifs or rhythmic patterns to maintain or vary.
+-   **Music Theory Integration & Validation:**
+    -   Incorporate optional music theory constraints into prompts (e.g., "use diatonic harmony in C minor", "develop the previous melodic idea").
+    -   Add post-processing steps using libraries like `music21` to analyze, validate, or even attempt to correct the generated symbolic music based on basic rules (e.g., voice leading, harmonic resolution).
 
 # TODO
