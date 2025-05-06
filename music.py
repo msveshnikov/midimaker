@@ -25,7 +25,7 @@ import pretty_midi
 
 # Configuration dictionary
 CONFIG = {
-    "gemini_model": "gemini-2.5-pro-exp-03-25", #"gemini-2.0-flash-thinking-exp-01-21" 
+    "gemini_model": "gemini-2.5-pro-preview-05-06", #"gemini-2.0-flash-thinking-exp-01-21" 
     "api_key": os.environ.get("GEMINI_KEY"),
     "openai_model": "o4-mini", 
     "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
