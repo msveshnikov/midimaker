@@ -30,7 +30,7 @@ CONFIG = {
     "openai_model": "o4-mini", 
     "openai_api_key": os.getenv("OPENAI_KEY"), # Recommended: Load from environment
     "use_openai": False,  # Set to True to use OpenAI instead of Gemini
-    "initial_description": "Acoustic folk tune with gentle guitar and warm vocal harmony. (Acoustic, folk, organic)",
+    "initial_description": "Adrenochrome",
     "output_dir": "output",
     "default_tempo": 120,
     "default_timesig": (4, 4),
