@@ -5,7 +5,6 @@ Includes helper functions for pitch and duration conversion.
 """
 
 import re
-import math
 import traceback
 
 # Import from local modules

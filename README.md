@@ -134,4 +134,8 @@ This format is designed for conciseness and ease of parsing, making it suitable 
     -   Incorporate optional music theory constraints into prompts (e.g., "use diatonic harmony in C minor", "develop the previous melodic idea").
     -   Add post-processing steps using libraries like `music21` to analyze, validate, or even attempt to correct the generated symbolic music based on basic rules (e.g., voice leading, harmonic resolution).
 
-# TODO
+## 7. How to Use
+
+-   put your keys in config.py
+-   set description and other parameters
+-   run main.py

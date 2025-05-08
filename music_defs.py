@@ -63,6 +63,10 @@ INSTRUMENT_PROGRAM_MAP = {
     "pno": 0, "piano": 0, "acoustic grand piano": 0, "bright acoustic piano": 1,
     "electric grand piano": 2, "honky-tonk piano": 3, "electric piano 1": 4,
     "rhodes piano": 4, "electric piano 2": 5, "epiano": 4,
+    "chorused piano": 5,
+    "harpsichord": 6,
+    "clavinet":7,
+    
     # Chromatic Percussion
     "celesta": 8, "glockenspiel": 9, "music box": 10, "vibraphone": 11,
     "marimba": 12, "xylophone": 13, "tubular bells": 14, "dulcimer": 15,
@@ -77,13 +81,14 @@ INSTRUMENT_PROGRAM_MAP = {
     "overdriven guitar": 29, "distortion guitar": 30, "guitar harmonics": 31,
     # Bass
     "bass": 33, "acoustic bass": 32, "electric bass": 33, "finger bass": 33,
-    "pick bass": 34, "fretless bass": 35, "slap bass": 36, "synth bass": 38,
+    "pick bass": 34, "fretless bass": 35, "slap bass": 36, "slap bass 2": 37, "synth bass": 38, "synth bass 1": 38,
     "synthbass": 38, "synth bass 2": 39,
     # Strings
     "str": 48, "strings": 48, "violin": 40, "viola": 41, "cello": 42,
     "contrabass": 43, "tremolo strings": 44, "pizzicato strings": 45,
     "orchestral harp": 46, "timpani": 47, "string ensemble 1": 48,
-    "string ensemble 2": 49, "synth strings 1": 50, "synth strings 2": 51,
+    "string ensemble 2": 49, "synth strings 1": 50, "synth strings 2": 51, 	"choir aahs": 52,
+    "voice": 52, "voice oohs": 53, "synth voice": 54, "orchestra hit": 55,
     # Brass
     "tpt": 56, "trumpet": 56, "trombone": 57, "tuba": 58, "muted trumpet": 59,
     "french horn": 60, "brass section": 61, "synth brass 1": 62,
@@ -96,11 +101,11 @@ INSTRUMENT_PROGRAM_MAP = {
     "flt": 73, "flute": 73, "piccolo": 72, "recorder": 74, "pan flute": 75,
     "blown bottle": 76, "shakuhachi": 77, "whistle": 78, "ocarina": 79,
     # Synth Lead
-    "synlead": 81, "synth lead": 81, "lead 1 (square)": 80, "lead 2 (sawtooth)": 81,
+    "synlead": 81, "synth lead": 81, "lead 1 (square)": 80, "lead 2 (sawtooth)": 81, "synthlead" : 81,
     "lead 3 (calliope)": 82, "lead 4 (chiff)": 83, "lead 5 (charang)": 84,
     "lead 6 (voice)": 85, "lead 7 (fifths)": 86, "lead 8 (bass + lead)": 87,
     # Synth Pad
-    "synpad": 89, "synth pad": 89, "pad 1 (new age)": 88, "pad 2 (warm)": 89,
+    "synpad": 89, "synth pad": 89, "pad 1 (new age)": 88, "pad 2 (warm)": 89, "synthpad": 89,
     "pad 3 (polysynth)": 90, "pad 4 (choir)": 91, "pad 5 (bowed)": 92,
     "pad 6 (metallic)": 93, "pad 7 (halo)": 94, "pad 8 (sweep)": 95,
     # Synth FX
@@ -119,7 +124,7 @@ INSTRUMENT_PROGRAM_MAP = {
     # Arp (Mapped to a synth sound)
     "arp": 81, "arpeggiator": 81,
     # Drums are a special case (channel 10 / index 9) - Program 0 is conventional
-    "drs": 0, "drums": 0, "drumkit": 0, "elecdrums": 0, "808drums": 0, "percussion": 0,
+    "drs": 0, "drums": 0, "drumkit": 0, "elecdrums": 0, "808drums": 0, "percussion": 0, "sfx": 0,
 }
 
 # Set of lowercase track IDs that should be treated as drum tracks

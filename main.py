@@ -17,7 +17,7 @@ import os
 
 # Import modules from the MidiMaker package/directory
 import config
-import llm_interface
+import llm_interface 
 import pipeline
 import symbolic_parser
 import midi_generator
