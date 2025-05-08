@@ -27,6 +27,7 @@ PitchNames (`<Pitch>`):
 DurationSymbols (`<Duration>`): W (Whole), H (Half), Q (Quarter), E (Eighth), S (Sixteenth), T (Thirty-second). Append '.' for dotted notes (e.g., Q., E.). Must be one of these symbols.
 Velocity (`<Velocity>`): MIDI velocity (0-127). Must be a number. Affects loudness.
 Pitches (`<Pitches>`): Comma-separated list of pitch names within square brackets (e.g., [C3,Eb3,G3]). For chords on drum tracks, list drum sound names. No spaces inside brackets unless part of a pitch name (shouldn't be).
+Please follow the format strictly. Use one line per command. Do not include comments after the command parameters on the same line. Use only one drum instrument per line. Use the provided mappings for instrument names and drum sounds. Do not use any other symbols or characters outside of the specified format.
 
 Example Note (Melodic): N:Melody:G5:E:95
 Example Chord (Melodic): C:PnoLH:[C3,Eb3,G3]:H:60
@@ -124,7 +125,7 @@ INSTRUMENT_PROGRAM_MAP = {
     # Arp (Mapped to a synth sound)
     "arp": 81, "arpeggiator": 81,
     # Drums are a special case (channel 10 / index 9) - Program 0 is conventional
-    "drs": 0, "drums": 0, "drumkit": 0, "elecdrums": 0, "808drums": 0, "percussion": 0, "sfx": 0,
+    "drs": 0, "drums": 0, "drumkit": 0, "elecdrums": 0, "808drums": 0, "percussion": 0,
 }
 
 # Set of lowercase track IDs that should be treated as drum tracks
