@@ -122,7 +122,7 @@ def seconds_to_symbolic_duration_sequence(duration_sec, start_time, tempo_map, t
         if rel_quarters_value > 1e-9: # Avoid division by zero/near zero
             # How many times does this duration symbol fit into the remaining duration?
             # Use tolerance when checking if it fits
-            while remaining_relative_quarters >= rel_quarters_value * (1.0 - tolerance / rel_quarters_value):
+            while remaining_relative_quarters >= rel_quarters_value * (1.0 - tolerance / rel_quarters_value if rel_quarters_value > 1e-9 else 1.0): # avoid div by zero for tolerance
                  # Check if remaining is very close to this duration
                  if abs(remaining_relative_quarters - rel_quarters_value) < tolerance * rel_quarters_value:
                       symbolic_sequence.append(symbol)
@@ -130,12 +130,14 @@ def seconds_to_symbolic_duration_sequence(duration_sec, start_time, tempo_map, t
                       break # Found the best fit for the remainder
 
                  # If not a close fit, but larger, take the symbol
-                 if remaining_relative_quarters >= rel_quarters_value * (1.0 + tolerance / rel_quarters_value):
+                 if remaining_relative_quarters >= rel_quarters_value * (1.0 + tolerance / rel_quarters_value if rel_quarters_value > 1e-9 else 1.0): # avoid div by zero for tolerance
                       symbolic_sequence.append(symbol)
                       remaining_relative_quarters -= rel_quarters_value
                  else:
                       # Remaining is smaller than current symbol, try the next one
                       break
+        if remaining_relative_quarters < tolerance * total_relative_quarters and remaining_relative_quarters < tolerance: # Break if remainder is negligible
+            break
         # If loop finishes and remaining_relative_quarters is still > tolerance, it couldn't be perfectly decomposed
 
     # If there's still a significant duration left
@@ -201,7 +203,11 @@ def midi_to_symbolic(midi_file_path):
     time_tolerance = 1e-6 # Use a consistent time tolerance
 
     # 1. Extract and process global meta-messages
-    tempo_changes = [(c.time, c.qpm) for c in midi_data.tempo_changes]
+    # --- FIXED LINE BELOW ---
+    tempo_change_times, tempo_qpm_values = midi_data.get_tempo_changes()
+    tempo_changes = list(zip(tempo_change_times, tempo_qpm_values))
+    # --- END OF FIX ---
+    
     ts_changes = [(c.time, c.numerator, c.denominator) for c in midi_data.time_signature_changes]
     key_changes = [(c.time, pretty_midi.key_number_to_key_name(c.key_number)) for c in midi_data.key_signature_changes]
 
@@ -235,7 +241,12 @@ def midi_to_symbolic(midi_file_path):
         if not symbolic_inst_name:
              symbolic_inst_name = _PROGRAM_TO_INSTRUMENT_NAME.get(instrument.program, f"Program{instrument.program}")
 
-        is_drum_track = instrument.is_drum or instrument.program == 128 # GM Percussion Kit is program 128
+        is_drum_track = instrument.is_drum # pretty_midi.Instrument.is_drum is a boolean
+        # GM Percussion Kit is MIDI channel 9 (0-indexed), not program 128. 
+        # However, some MIDI files might assign program 128 to a drum track.
+        # pretty_midi's is_drum usually handles this by checking the channel.
+        # Keeping the check for instrument.program == 128 can be a fallback,
+        # but is_drum should be the primary indicator.
 
         # Determine symbolic track ID - make it unique and somewhat descriptive
         # Combine cleaned instrument name and index
@@ -247,8 +258,18 @@ def midi_to_symbolic(midi_file_path):
         print(f"Mapped MIDI Instrument {inst_idx} ('{instrument.name}', Program {instrument.program}, IsDrum {instrument.is_drum}) to Symbolic: INST='{symbolic_inst_name}', TrackID='{symbolic_track_id}', IsDrumTrack={is_drum_track}")
 
         # Add INST command for non-drum tracks before the first BAR marker, only add if not already added
-        if not is_drum_track and symbolic_inst_name not in [line.split(':')[1] for line in inst_initial_symbolic_lines if line.startswith('INST:')]:
+        # Check against existing INST lines by parsing them
+        existing_inst_names = []
+        for line in inst_initial_symbolic_lines:
+            if line.startswith('INST:'):
+                try:
+                    existing_inst_names.append(line.split(':')[1])
+                except IndexError:
+                    pass # Malformed line, ignore
+
+        if not is_drum_track and symbolic_inst_name not in existing_inst_names:
             inst_initial_symbolic_lines.append(f"INST:{symbolic_inst_name}")
+
 
         for note in instrument.notes:
             time_points.add(note.start)
@@ -323,40 +344,33 @@ def midi_to_symbolic(midi_file_path):
                  sec_per_bar_at_current_time = beats_per_bar_at_current_time * sec_per_beat_at_current_time
 
                  if sec_per_bar_at_current_time <= time_tolerance: # Avoid infinite loop with zero bar duration
-                     # This segment might contain events even if bar duration is zero (e.g. tempo change to 0)
-                     # We can't reliably advance time by bars, so just break the bar processing loop
                      print(f"Warning: Zero or near-zero bar duration calculated at time {current_segment_start_time:.3f}s. Cannot advance time reliably by bars.")
-                     break # Exit bar processing loop
+                     break 
 
                  time_into_current_bar = current_segment_start_time - bar_start_time
-                 # Calculate time to the next bar line, handling being exactly on a bar line
-                 time_to_next_bar_line = sec_per_bar_at_current_time - (time_into_current_bar % sec_per_bar_at_current_time)
-                 if time_to_next_bar_line < time_tolerance and time_into_current_bar > time_tolerance: # If already very close to the bar line (but not at time 0)
-                      time_to_next_bar_line = sec_per_bar_at_current_time # The duration of the *next* bar
+                 time_to_next_bar_line = sec_per_bar_at_current_time - (time_into_current_bar % sec_per_bar_at_current_time if sec_per_bar_at_current_time > 1e-9 else 0)
+                 if abs(time_to_next_bar_line - sec_per_bar_at_current_time) < time_tolerance or time_to_next_bar_line < time_tolerance : # If on the bar line or very close
+                     time_to_next_bar_line = sec_per_bar_at_current_time
 
-                 # How much time do we advance in this bar processing step? Either to the end of the segment, or to the next bar line, whichever comes first.
+
                  advance_time = min(time_to_process, time_to_next_bar_line)
 
-                 # Check if advancing crosses a bar line
-                 if advance_time >= time_to_next_bar_line - time_tolerance and time_to_next_bar_line > time_tolerance:
-                      # We are crossing or landing on a bar line
+                 if advance_time >= time_to_next_bar_line - time_tolerance and time_to_next_bar_line > time_tolerance :
                       current_segment_start_time += time_to_next_bar_line
                       time_to_process -= time_to_next_bar_line
                       current_bar += 1
                       bar_start_time = current_segment_start_time
                       symbolic_lines.append(f"BAR:{current_bar}")
                  else:
-                      # Advance within the current bar, consuming the rest of the segment time
                       current_segment_start_time += time_to_process
-                      time_to_process = 0 # Consumed all time for this segment
+                      time_to_process = 0 
 
-            # Update global time to the current time_point after handling bars
             global_time = time_point
 
         # Update global state if meta-messages occur exactly at this time point
         temp_tempo, (temp_ts_num, temp_ts_den), temp_key = get_active_state(global_time, tempo_changes, ts_changes, key_changes)
 
-        if abs(temp_tempo - current_tempo) > 1e-3: # Use tolerance for tempo comparison
+        if abs(temp_tempo - current_tempo) > 1e-3: 
             symbolic_lines.append(f"T:{temp_tempo:.2f}")
             current_tempo = temp_tempo
 
@@ -364,7 +378,6 @@ def midi_to_symbolic(midi_file_path):
              symbolic_lines.append(f"TS:{temp_ts_num}/{temp_ts_den}")
              current_ts_num, current_ts_den = temp_ts_num, temp_ts_den
 
-        # Validate key name before adding K
         if temp_key != current_key:
             if music_defs.KEY_SIGNATURE_PATTERN.match(temp_key):
                 symbolic_lines.append(f"K:{temp_key}")
@@ -373,12 +386,9 @@ def midi_to_symbolic(midi_file_path):
                  print(f"Warning: Invalid key name '{temp_key}' found at time {global_time:.3f}s. Ignoring key change.")
 
 
-        # Process notes starting exactly at this time point, track by track
         for inst_idx, (sym_inst_name, sym_track_id, is_drum_track) in inst_map.items():
             track_notes = notes_by_inst.get(inst_idx, [])
             notes_starting_now = []
-            # Find notes starting exactly at global_time from the remaining notes for this track
-            # Use the processed index to avoid re-scanning notes that started earlier
             start_idx = track_notes_processed_indices[inst_idx]
             notes_to_check = track_notes[start_idx:]
 
@@ -387,50 +397,28 @@ def midi_to_symbolic(midi_file_path):
                  if abs(note_start - global_time) < time_tolerance:
                       notes_starting_now.append(note_event)
                  elif note_start > global_time + time_tolerance:
-                      # Notes are sorted, so we can stop looking
                       break
-                 # Notes with start < global_time - time_tolerance are before this time point and handled by start_idx
 
             if notes_starting_now:
-                # Advance processed index past these notes
                 track_notes_processed_indices[inst_idx] += len(notes_starting_now)
 
-                # Handle rest before the note(s) of this track event
                 rest_duration_sec = global_time - track_current_time[inst_idx]
-                if rest_duration_sec > time_tolerance: # If there's a significant gap
+                if rest_duration_sec > time_tolerance: 
                      rest_symbols = seconds_to_symbolic_duration_sequence(rest_duration_sec, track_current_time[inst_idx], tempo_changes, ts_changes)
                      if rest_symbols:
                          symbolic_lines.append(f"R:{sym_track_id}:{' '.join(rest_symbols)}")
-                     elif rest_duration_sec > 0.05: # Add a warning if a significant rest couldn't be symbolized
+                     elif rest_duration_sec > 0.05: 
                           print(f"Warning: Could not symbolize rest of {rest_duration_sec:.3f}s for track '{sym_track_id}' starting at time {track_current_time[inst_idx]:.3f}s and ending at {global_time:.3f}s.")
-
-                # track_current_time is the time *after* the last event on this track ended.
-                # The new event starts at global_time. The rest was from track_current_time to global_time.
-                # Now, the track time advances to the end of the new event.
-
-                # Group notes starting *exactly* at global_time with the same duration and velocity
-                # This ensures that only notes that can form a valid symbolic chord (same start, same end, same vel)
-                # are grouped together. Notes starting at the same time but different durations/vels become separate events.
-
-                # Group notes by (start, end, velocity) tuple
+                
                 note_groups = defaultdict(list)
                 for note_start, note_end, pitch, vel, _ in notes_starting_now:
-                     # Use rounded times/vel for grouping keys to handle float inaccuracies
-                     # Velocity can be 0-127, rounding is fine. Time needs careful rounding.
                      group_key = (round(note_start, 6), round(note_end, 6), int(round(vel)))
-                     note_groups[group_key].append(pitch) # Store pitch
+                     note_groups[group_key].append(pitch) 
 
-                event_end_time_for_this_track = track_current_time[inst_idx] # Keep track of the latest end time among events processed at this time point
+                event_end_time_for_this_track = track_current_time[inst_idx] 
 
-                # Process each group (which represents a single note event or a chord event)
-                # Sort groups by start time (should be the same, but for consistency), then end time, then velocity
                 for (event_start_time, event_end_time, event_velocity), pitches in sorted(note_groups.items()):
-                    # event_start_time should be global_time (within tolerance)
-                    # event_end_time is the end time for this group
-                    # event_velocity is the velocity for this group
-
                     valid_pitches = []
-                    # Sort pitches within the group for consistent chord representation
                     pitches.sort()
                     for pitch in pitches:
                         symbolic_pitch = midi_pitch_to_symbolic(pitch, is_drum_track)
@@ -440,100 +428,91 @@ def midi_to_symbolic(midi_file_path):
                             print(f"Warning: Could not convert pitch {pitch} to symbolic for track '{sym_track_id}' in group starting at time {event_start_time:.3f}s. Skipping pitch.")
 
                     if valid_pitches:
-                        # Calculate duration for this specific event group
                         event_duration_sec = event_end_time - event_start_time
 
-                        # Only symbolize if duration is significant
                         if event_duration_sec > time_tolerance:
                             duration_symbols = seconds_to_symbolic_duration_sequence(event_duration_sec, event_start_time, tempo_changes, ts_changes)
 
-                            if not duration_symbols:
-                                 # Fallback duration if conversion yields nothing, but duration was significant
-                                 print(f"Warning: Could not symbolize duration {event_duration_sec:.3f}s for note/chord at time {event_start_time:.3f}s. Using 'Q' as fallback.")
-                                 duration_symbols = ["Q"]
+                            if not duration_symbols and event_duration_sec > 0.01: # Only warn if duration symbols are empty for a somewhat significant duration
+                                 print(f"Warning: Could not symbolize duration {event_duration_sec:.3f}s for note/chord at time {event_start_time:.3f}s. Using 'T' as fallback if very short, or it might be missed.")
+                                 # Attempt to use smallest if very short and not covered by main logic
+                                 if event_duration_sec < _get_relative_quarter_duration('T') * (60.0/current_tempo) * 2: # if duration is less than 2x a thirty-second note
+                                     duration_symbols = ["T"]
+                                 else: # Otherwise, if still no symbols for a longer duration, it's problematic
+                                     duration_symbols = ["Q"] # A more noticeable fallback for longer un-symbolized durations
 
-                            # Ensure velocity is within valid MIDI range (1-127 for notes)
-                            safe_velocity = max(1, min(127, int(event_velocity)))
+                            if not duration_symbols and event_duration_sec > time_tolerance: # If still no symbols after fallback, might be an issue or very short
+                                 # For very short notes that couldn't be symbolized, and if no fallback worked,
+                                 # we might skip them or use a minimal representation if essential.
+                                 # Current logic in seconds_to_symbolic_duration_sequence tries to handle this with 'T'
+                                 # If it still comes back empty here, it means it was too short even for 'T' or some other issue.
+                                 # print(f"Info: Note/chord at {event_start_time:.3f}s with duration {event_duration_sec:.3f}s was too short to symbolize or resulted in no symbols.")
+                                 pass # Skip adding if no duration symbols and it's truly negligible or unrepresentable
 
-                            if len(valid_pitches) > 1:
-                                # It's a chord
-                                symbolic_lines.append(f"C:{sym_track_id}:[{','.join(valid_pitches)}]:{' '.join(duration_symbols)}:{safe_velocity}")
-                            else:
-                                # It's a single note
-                                symbolic_lines.append(f"N:{sym_track_id}:{valid_pitches[0]}:{' '.join(duration_symbols)}:{safe_velocity}")
-
-                            # Update track_current_time to the end of the latest event processed *at this global_time*
-                            event_end_time_for_this_track = max(event_end_time_for_this_track, event_end_time)
-                        # else: Very short duration, already handled by initial check, or skip adding
-
-                # After processing all groups starting at global_time for this track, update the track's current time
+                            if duration_symbols: # Only proceed if we have duration symbols
+                                safe_velocity = max(1, min(127, int(event_velocity)))
+                                if len(valid_pitches) > 1:
+                                    symbolic_lines.append(f"C:{sym_track_id}:[{','.join(valid_pitches)}]:{' '.join(duration_symbols)}:{safe_velocity}")
+                                else:
+                                    symbolic_lines.append(f"N:{sym_track_id}:{valid_pitches[0]}:{' '.join(duration_symbols)}:{safe_velocity}")
+                                event_end_time_for_this_track = max(event_end_time_for_this_track, event_end_time)
+                
                 track_current_time[inst_idx] = event_end_time_for_this_track
-                # Note: This means track_current_time can advance past global_time if a note/chord spans across time points.
-                # The rest calculation at the *next* time point will handle this gap correctly.
 
 
-    # 5. Add final rests if any track ends before the global last event time
-    # The global last event time is the end time of the very last note in the MIDI file.
     last_event_time = 0.0
     if note_events:
-        last_event_time = max(note[1] for note in note_events)
+        last_event_time = max(note[1] for note in note_events) # Max end time of notes
 
-    # Also consider the time of the last meta-message if it's after the last note
-    if tempo_changes: last_event_time = max(last_event_time, tempo_changes[-1][0])
-    if ts_changes: last_event_time = max(last_event_time, ts_changes[-1][0])
-    if key_changes: last_event_time = max(last_event_time, key_changes[-1][0])
-
-    # Ensure last_event_time is at least the end time of the last time point processed
-    if sorted_time_points:
+    all_meta_times = []
+    if tempo_changes: all_meta_times.extend([t[0] for t in tempo_changes])
+    if ts_changes: all_meta_times.extend([t[0] for t in ts_changes])
+    if key_changes: all_meta_times.extend([t[0] for t in key_changes])
+    if all_meta_times:
+        last_event_time = max(last_event_time, max(all_meta_times))
+    
+    if sorted_time_points: # The last processed time_point in the loop
         last_event_time = max(last_event_time, sorted_time_points[-1])
 
-    # Use a small buffer to ensure rests go slightly past the last note end time, if needed
-    # This helps capture rests after the final event if the piece extends slightly
-    # last_event_time += 0.1 # Optional: add a small buffer
 
-
-    # Add BAR markers up to the end of the piece if needed
-    # Continue bar processing from the last global_time reached in the loop
     time_to_process_after_loop = last_event_time - global_time
-    current_segment_start_time = global_time
+    current_segment_start_time_final = global_time # Use a different var name to avoid confusion with loop var
 
     while time_to_process_after_loop > time_tolerance:
-        temp_tempo, (temp_ts_num, temp_ts_den), _ = get_active_state(current_segment_start_time, tempo_changes, ts_changes, key_changes)
+        temp_tempo, (temp_ts_num, temp_ts_den), _ = get_active_state(current_segment_start_time_final, tempo_changes, ts_changes, key_changes)
         beats_per_bar_at_current_time = temp_ts_num * (4.0 / temp_ts_den) if temp_ts_den > 0 else 4.0
         sec_per_beat_at_current_time = 60.0 / temp_tempo if temp_tempo > 0 else 0.5
         sec_per_bar_at_current_time = beats_per_bar_at_current_time * sec_per_beat_at_current_time
 
         if sec_per_bar_at_current_time <= time_tolerance:
-            # Cannot reliably advance time by bars in a zero-duration segment
-            # Break the bar processing loop, time may not align perfectly with bars after this point
-            print(f"Warning: Zero or near-zero bar duration calculated at time {current_segment_start_time:.3f}s during final bar processing. Cannot advance time reliably by bars.")
+            print(f"Warning: Zero or near-zero bar duration calculated at time {current_segment_start_time_final:.3f}s during final bar processing.")
             break
 
-        time_into_current_bar = current_segment_start_time - bar_start_time
-        time_to_next_bar_line = sec_per_bar_at_current_time - (time_into_current_bar % sec_per_bar_at_current_time)
-        if time_to_next_bar_line < time_tolerance and time_into_current_bar > time_tolerance:
+        time_into_current_bar = current_segment_start_time_final - bar_start_time
+        time_to_next_bar_line = sec_per_bar_at_current_time - (time_into_current_bar % sec_per_bar_at_current_time if sec_per_bar_at_current_time > 1e-9 else 0)
+        if abs(time_to_next_bar_line - sec_per_bar_at_current_time) < time_tolerance or time_to_next_bar_line < time_tolerance :
              time_to_next_bar_line = sec_per_bar_at_current_time
-
+        
         advance_time = min(time_to_process_after_loop, time_to_next_bar_line)
 
         if advance_time >= time_to_next_bar_line - time_tolerance and time_to_next_bar_line > time_tolerance:
-             current_segment_start_time += time_to_next_bar_line
+             current_segment_start_time_final += time_to_next_bar_line
              time_to_process_after_loop -= time_to_next_bar_line
-             current_bar += 1
-             bar_start_time = current_segment_start_time
-             symbolic_lines.append(f"BAR:{current_bar}")
+             if current_segment_start_time_final <= last_event_time + time_tolerance : # Only add bar if it's within or at the end of the piece
+                current_bar += 1
+                bar_start_time = current_segment_start_time_final # bar_start_time should update to the time of the new bar
+                symbolic_lines.append(f"BAR:{current_bar}")
         else:
-             current_segment_start_time += time_to_process_after_loop
+             current_segment_start_time_final += time_to_process_after_loop
              time_to_process_after_loop = 0
 
-    # Add final rests for each track from its last event end time to the overall last event time
     for inst_idx, (sym_inst_name, sym_track_id, is_drum_track) in inst_map.items():
         rest_duration_sec = last_event_time - track_current_time[inst_idx]
         if rest_duration_sec > time_tolerance:
             rest_symbols = seconds_to_symbolic_duration_sequence(rest_duration_sec, track_current_time[inst_idx], tempo_changes, ts_changes)
             if rest_symbols:
                 symbolic_lines.append(f"R:{sym_track_id}:{' '.join(rest_symbols)}")
-            elif rest_duration_sec > 0.05: # Add warning for significant unsymbolized rest
+            elif rest_duration_sec > 0.05: 
                  print(f"Warning: Could not symbolize final rest of {rest_duration_sec:.3f}s for track '{sym_track_id}' ending at time {track_current_time[inst_idx]:.3f}s.")
 
 
@@ -542,14 +521,17 @@ def midi_to_symbolic(midi_file_path):
 
 if __name__ == "__main__":
     print("converting midi to symbolic format")
-    midi_file_path = "output/generated_music_01.mid"  # Replace with your MIDI file path
+    midi_file_path = "output/generated_music_20250506_180304.mid"  # Replace with your MIDI file path
     symbolic_text = midi_to_symbolic(midi_file_path)
     if symbolic_text:
         print("Symbolic text generated successfully.")
         print(symbolic_text)
+        output_file_path = "output/output_symbolic.txt"
+        try:
+            with open(output_file_path, "w") as f:
+                 f.write(symbolic_text)
+            print(f"Symbolic text saved to {output_file_path}")
+        except IOError as e:
+            print(f"Error saving symbolic text to file: {e}")
     else:
         print("Failed to generate symbolic text.")
-    # Save symbolic text to a file if needed
-    with open("output/output_symbolic.txt", "w") as f:
-         f.write(symbolic_text)
-         print("Symbolic text saved to output_symbolic.txt")
