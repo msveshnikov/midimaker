@@ -141,3 +141,7 @@ This format is designed for conciseness and ease of parsing, making it suitable 
 -   run main.py
 -   check warnings and upgrade to gemini-2.5-pro-exp-03-25 or gemini-2.5-pro-preview-05-06 which are not cheap but worth it
 -   use some good soundfonts for midi playback
+
+# TODO
+
+-   create back transform midi to symbolic format
