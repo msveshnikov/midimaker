@@ -9,48 +9,41 @@ import re
 # --- Symbolic Format Definition (for prompts and parsing) ---
 SYMBOLIC_FORMAT_DEFINITION = """
 Use this compact symbolic format ONLY. Each command must be on a new line. Do NOT include comments after the command parameters on the same line.
-- `INST:<InstrumentName>`: Sets the active instrument context for subsequent non-drum notes/chords. Examples: Pno, Gtr, Bass, Str, Flt, Tpt, SynPad, SynLead, Arp. This determines the MIDI program number for melodic parts. Use lowercase instrument names from the provided list.
 - `T:<BPM>`: Sets the tempo in Beats Per Minute (e.g., T:120). Must be a number.
 - `TS:<N>/<D>`: Sets the time signature (e.g., TS:4/4). Denominator should ideally be a power of 2.
 - `K:<Key>`: Sets the key signature (e.g., K:Cmin, K:Gmaj, K:Ddor). Use standard `pretty_midi` key names (Major: maj, Minor: min, Modes: dor, phr, lyd, mix, loc, Ion=Maj, Aeo=Min).
 - `BAR:<Num>`: Marks the beginning of a bar (measure), starting from 1, strictly sequential. Timing calculations rely on this.
-- `N:<Track>:<Pitch>:<Duration>:<Velocity>`: Represents a single Note event.
-- `C:<Track>:<Pitches>:<Duration>:<Velocity>`: Represents a Chord event (multiple notes starting simultaneously).
-- `R:<Track>:<Duration>`: Represents a Rest (silence) event for a specific track.
+- `N:<InstrumentName>:<Pitch>:<Duration>:<Velocity>`: Represents a single Note event. 
+- `C:<InstrumentName>:<Pitches>:<Duration>:<Velocity>`: Represents a Chord event (multiple notes starting simultaneously).
+- `R:<InstrumentName>:<Duration>`: Represents a Rest (silence) event for a specific track.
 
-TrackIDs (`<Track>`): Use simple names like RH, LH, Melody, Bass, Drums, Arp1, Pad, Lead etc.
-    - If the TrackID is recognized as a drum track name (e.g., 'drums', 'drumkit', 'percussion', 'elecdrums', '808drums'), the `<Pitch>` will be interpreted as a drum sound name (see below), and it will use MIDI channel 10. Case-insensitive matching for drum track IDs.
-    - If the TrackID is NOT a recognized drum track name, it's considered a melodic track. The instrument sound (MIDI program) used for this track is determined by the *last* `INST:` command encountered before this note/chord/rest.
+<InstrumentName>: Use lowercase instrument names from the provided list.
+    - If <InstrumentName> is recognized as a drum track name (e.g., 'drums', 'drumkit', 'percussion', 'elecdrums', '808drums'), the `<Pitch>` will be interpreted as a drum sound name (see below), and it will use MIDI channel 10. Case-insensitive matching for drum track IDs.
+    - If <InstrumentName> is NOT a recognized drum track name, it's considered a melodic track. 
 PitchNames (`<Pitch>`):
     - For Melodic Tracks: Standard notation (e.g., C4, F#5, Gb3). Middle C is C4.
     - For Drum Tracks: Use drum sound names like Kick, Snare, HHC, HHO, Crash, Ride, HT, MT, LT (case-insensitive). See mapping below. Do NOT use standard notes (C4) on drum tracks.
 DurationSymbols (`<Duration>`): W (Whole), H (Half), Q (Quarter), E (Eighth), S (Sixteenth), T (Thirty-second). Append '.' for dotted notes (e.g., Q., E.). Must be one of these symbols.
 Velocity (`<Velocity>`): MIDI velocity (0-127). Must be a number. Affects loudness.
 Pitches (`<Pitches>`): Comma-separated list of pitch names within square brackets (e.g., [C3,Eb3,G3]). For chords on drum tracks, list drum sound names. No spaces inside brackets unless part of a pitch name (shouldn't be).
-Please follow the format strictly. Use one line per command. Do not include comments after the command parameters on the same line. Use only one drum instrument per line. Use the provided mappings for instrument names and drum sounds. Do not use any other symbols or characters outside of the specified format.
+Please follow the format strictly. Use one line per command. Do not include comments after the command parameters on the same line. Use the provided mappings for instrument names and drum sounds. Do not use any other symbols or characters outside of the specified format.
 
-Example Note (Melodic): N:Melody:G5:E:95
-Example Chord (Melodic): C:PnoLH:[C3,Eb3,G3]:H:60
-Example Rest: R:Bass:W
-Example Drum Note: N:Drums:Kick:Q:95
-Example Drum Chord (Multiple hits): C:Drums:[Kick,HHC]:E:100
+Example Note (Melodic): N:synlead:G5:E:95
+Example Chord (Melodic): C:piano:[C3,Eb3,G3]:H:60
+Example Rest: R:bass:W
+Example Drum Note: N:drums:Kick:Q:95
 
 Example Sequence:
 K:Amin
 T:90
 TS:4/4
-INST:synpad
-INST:synthbass
 BAR:1
-INST:synpad # Re-set for Pad track if needed
-C:Pad:[A3,C4,E4]:W:55
-INST:synthbass # Set for Bass track
-N:Bass:A2:Q.:100
-N:Bass:E2:E:100
-N:Bass:A2:H:100
-N:Drums:Kick:Q:95
-N:Drums:HHC:E:80
-# ... rest of example
+C:pad:[A3,C4,E4]:W:55
+N:bass:A2:Q.:100
+N:bass:E2:E:100
+N:bass:A2:H:100
+N:drums:Kick:Q:95
+N:drums:HHC:E:80
 """
 
 # --- Music Data Structures and Mappings ---
