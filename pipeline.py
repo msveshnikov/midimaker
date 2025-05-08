@@ -19,7 +19,7 @@ def enrich_music_description(description):
     """Step 1: Use LLM to enrich the initial music description."""
     print("\n--- Step 1: Enriching Description ---")
     prompt = f"""
-Analyze the following music description. Extract or infer the key signature (using standard notation like 'Amin', 'F#maj', 'Gdor'), tempo (BPM), time signature (N/D), and suggest primary instrumentation.
+Analyze the following music description. Extract or infer the key signature (using standard notation like 'Amin', 'F#maj', 'Gdor'), tempo (BPM), time signature (N/D), and suggest primary instrumentation (list like INST:SynLead, INST:SynthBass, INST:Drums).
 If any parameter is explicitly mentioned, use that. If not, infer plausible values based on the description (genre, mood, artist references, etc.).
 Also, identify the core mood and suggest a musical structure (like AABA, ABAC, Verse-Chorus-Bridge) if not already provided.
 
@@ -27,7 +27,7 @@ Output the parameters clearly at the start using these exact prefixes:
 K: <key_signature>
 T: <tempo_bpm>
 TS: <numerator>/<denominator>
-Instruments: <instrument1>, <instrument2>, ...
+INST: <instrument1>, <instrument2>, ...
 Mood: <mood_description>
 Structure: <structure_suggestion>
 
@@ -223,14 +223,14 @@ Target Bars: {bars} (Start this section exactly at BAR:{current_bar}, end *befor
 Section Goal: {goal}
 
 Instructions:
-1. Generate music ONLY for this section, starting *exactly* with `BAR:{current_bar}` unless initial T, TS, or K commands are needed for this specific section start.
-2. If tempo (T), time signature (TS), key (K) need to be set or changed *at the very beginning* of this section (time = start of BAR:{current_bar}), include those commands *before* the `BAR:{current_bar}` marker. Otherwise, assume they carry over from the previous section context or use defaults (T:{default_tempo}, TS:{default_timesig[0]}/{default_timesig[1]}, K:{default_key}). 
+1. Generate music ONLY for this section, starting *exactly* with `BAR:{current_bar}` unless initial T, TS, K, or INST commands are needed for this specific section start.
+2. If tempo (T), time signature (TS), key (K), or melodic instrument (INST) need to be set or changed *at the very beginning* of this section (time = start of BAR:{current_bar}), include those commands *before* the `BAR:{current_bar}` marker. Otherwise, assume they carry over from the previous section context or use defaults (T:{default_tempo}, TS:{default_timesig[0]}/{default_timesig[1]}, K:{default_key}). You can change INST multiple times within the section if needed for different melodic tracks. Remember INST only affects subsequent melodic tracks, not drum tracks.
 3. Strictly adhere to the compact symbolic format defined below. Output ONLY the commands, each on a new line.
 4. DO NOT include any other text, explanations, apologies, section titles, comments (#), or formatting like ```mus``` or ```.
 5. Ensure musical coherence within the section and try to achieve the Section Goal. Use appropriate instrumentation and musical ideas based on the goal and overall description.
 6. The total duration of notes/rests/chords within each bar MUST add up precisely according to the active time signature (e.g., 4 quarter notes in 4/4, 6 eighth notes in 6/8). Be precise. Use rests (R:<Track>:<Duration>) to fill empty time accurately for each active track within a bar. Ensure parallel tracks are synchronized at bar lines.
 7. End the generation cleanly *after* the content for bar {current_bar + bars - 1} is complete. Do NOT include `BAR:{current_bar + bars}`.
-8. Instrument Names. Use ONLY lowercase names from this list: {", ".join(music_defs.KNOWN_MELODIC_INSTRUMENTS)}.
+8. Instrument Names (for INST command): Use ONLY lowercase names from this list: {", ".join(music_defs.KNOWN_MELODIC_INSTRUMENTS)}.
 9. Drum Pitch Names (for N/C commands on drum tracks): Use ONLY names from this list (case-insensitive): {", ".join(music_defs.KNOWN_DRUM_SOUNDS)}.
 
 {music_defs.SYMBOLIC_FORMAT_DEFINITION}
