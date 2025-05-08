@@ -14,9 +14,9 @@ CONFIG = {
     "anthropic_api_key": os.getenv("CLAUDE_KEY"), # Recommended: Load from environment
     "grok_api_key": os.getenv("GROK_KEY"), # Recommended: Load from environment
     "anthropic_model": "claude-3-7-sonnet-20250219", # Default Anthropic model
-    "use_openai": False,  # Set to True to use OpenAI instead of Gemini
-    "use_anthropic": False,  # Set to True to use Anthropic instead of Gemini
-    "use_grok": False,  # Set to True to use Anthropic instead of Gemini
+    "use_openai": False,  # Set to True to use OpenAI instead of Gemini. Disclaimer: shitty model
+    "use_anthropic": False,  # Set to True to use Anthropic instead of Gemini. Disclaimer: shitty model
+    "use_grok": False,  # Set to True to use Anthropic instead of Gemini. Disclaimer: shitty model
     "initial_description": "Adrenochrome",
     "output_dir": "output",
     "default_tempo": 120,
