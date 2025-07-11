@@ -223,7 +223,7 @@ def _call_anthropic(prompt, retries=None, delay=None, output_format="text"):
 def _call_grok(prompt, retries=None, delay=None, output_format="text"):
     retries = retries if retries is not None else config.CONFIG.get("generation_retries", 3)
     delay = delay if delay is not None else config.CONFIG.get("generation_delay", 5)
-    grok_model = config.CONFIG.get("grok_model", "grok-3-mini-beta")
+    grok_model = config.CONFIG.get("grok_model", "grok-4")
     temperature = config.CONFIG.get("temperature", 0.7)
     grok_api_key = config.CONFIG.get("grok_api_key")
     if not grok_api_key:
